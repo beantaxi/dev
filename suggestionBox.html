@@ -1,0 +1,23 @@
+<html>
+<head>
+<script src='suggestionBox.js'></script>
+<script>
+$(onLoad);
+
+function onLoad ()
+{
+	console.log('BAM!');
+	var word = document.createTextNode('word');
+	$('#content').append('word');
+	$('.mainman').append('bird');
+	$('.toucanSam').append('perd');
+	$('#content').css('border', '5px solid green');
+}
+</script>
+</head>
+<div id='title'>Suggestion Box</div>
+<div id='content' class='mainman toucansam'>
+
+</div>
+</body>
+</html>
