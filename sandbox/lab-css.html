@@ -1,0 +1,222 @@
+<!doctype html>
+<html>
+<head>
+<link rel='stylesheet' href='jquery.datetimepicker.css'/>
+<style>
+body
+{
+	background: black;
+	color: white;
+	font-family: Arial;
+	height: 100%;
+	/* margin: 3px; */
+	margin: 0;
+	padding: 0;
+	position: absolute;
+	width: 100%;
+}
+
+
+.default
+{
+	border-width: 2px;
+	border-style: solid;
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+	position: relative;
+	vertical-align: top;
+}
+
+
+.fullChild
+{
+	height: 100%;
+	left: 0;
+	width: 100%;
+}
+
+.header
+{
+	border: 2px solid orange;
+	position: relative;
+	height: 3em;
+	vertical-align: bottom;
+	width: 100%;
+}
+
+.header > div
+{
+	bottom: 0;
+	position: absolute;
+	width: 100%;
+}
+
+.modeButton
+{
+   background-color: black;
+	border: 1px solid #ccc;
+	color: white;
+	cursor: pointer;
+	display: inline-block;
+   font-family: Arial;
+   font-size: 13px;
+	margin: 0;
+	padding: 4px 10px;
+   text-align: center;
+}
+
+.modeButton:hover
+{
+	border: 1px solid white;
+	background: #333;
+}
+
+.modeButton.selected
+{
+	background: #666
+}
+
+.modeButton input
+{
+	border: 0;
+	clip: rect(0, 0, 0, 0);
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	padding: 0;
+	position: absolute;
+	width: 1px;
+}
+
+.modeButton input.focusable: active, .modeButton input.focusable:focus
+{
+	clip: auto;
+	height: auto;
+	margin: 0;
+	overflow: visible;
+	position: static;
+	width: auto;
+}
+
+.section
+{
+	border-width: 2px;
+	border-style: solid;
+	box-sizing: border-box;
+	display: inline-block;
+	font-size: 1em;
+	height: 100%;
+	margin: 0;
+	padding: 0 0 0 0;
+	position: relative;
+	vertical-align: top;
+}
+
+#dtPickerContainer
+{
+	padding: 0px 0px;
+}
+
+#datetimepicker
+{
+	padding: 4px 0px;
+	width: 200px;
+}
+
+#main
+{
+	border-color: skyblue;
+/* 	padding-bottom: 33%; */
+	width: 33%;
+}
+
+#thumbnailHeadings
+{
+	width: 100%;
+}
+
+#thumbnailHeadings span
+{
+	box-sizing: border-box;
+	display: inline-block;
+	padding: 4px 0px;
+	width: 50%;
+}
+
+#thumbnails
+{
+	border-color: lime;
+	width: 67%;
+}
+
+#child img
+{
+	position: absolute;
+}
+
+.thumbnailSection
+{
+	box-sizing: border-box;
+	display: inline-block;
+	padding: 2px;
+	vertical-align: top;
+	width: 50%;
+}
+
+.thumbnailSection img
+{
+	border: 1px solid transparent;
+	box-sizing: border-box;
+	display: inline-block;
+	float: left;
+	margin: 0;
+	padding: 0;
+	width: 8.33333%;
+}
+
+#left
+{
+	border-color: orange;
+}
+
+#left img
+{
+}
+
+#right
+{
+	border-color: purple;
+	display: inline-block;
+	width: 50.0%;
+}
+
+</style>
+<script src='jquery.js'></script>
+<script src='jquery.datetimepicker.js'></script>
+<script src='moment.min.js'></script>
+<script src='lab-css.js'></script>
+</head>
+<body>
+<div id='main' class='section'>
+	<div id='dtPickerContainer' class='header'>
+		<div>
+			<span>Date <input id='datetimepicker'/></span>
+	   	<label class='modeButton'><input type='radio' name='grp' id='map'/>map</label>
+   	   <label class='modeButton'><input type='radio' name='grp' id='png'/>png</label>
+      	<label class='modeButton'><input type='radio' name='grp' id='avi'/>avi</label>
+      </div>
+   </div>
+	<div class='panel' id='pnl-png'>
+	 	<img id='bigImage' class='fullChild' src='ercotContourMap-20150601-234501.png'/> 
+	</div>
+</div><div id='thumbnails' class='section'>
+	<div id='thumbnailHeadings' class='header'>
+		<div><span id='headingsAm'>am</span><span id='headingsPm'>pm</span></div>
+	</div>
+	<div id='left' class='default, thumbnailSection'>
+	</div><div id='right' class='default, thumbnailSection'>
+	</div>
+</div>
+</body>
+</html>

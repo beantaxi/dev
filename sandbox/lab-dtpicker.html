@@ -1,0 +1,50 @@
+<html>
+<head>
+<link rel='stylesheet' href='jquery.datetimepicker.css'/>
+<script src='jquery.js'></script>
+<script src='jquery.datetimepicker.js'></script>
+<script>
+$G = {};
+
+function onLoad ()
+{
+	var initDate = new Date(2015, 1, 1, 12, 0, 0);
+	$('#datetimepicker').datetimepicker(
+		{
+			theme: 'dark', 
+			step: 5, 
+			onChangeDateTime: onChangeDateTime,
+			onClose: onClose,
+			value: initDate
+		});
+}
+
+
+function setImage ()
+{
+	$('#img').attr(src) = $G.imgsrc;
+}
+
+function onChangeDateTime (dt)
+{
+}
+
+
+function onClose (dt)
+{
+	console.log(dt);
+	dt = $.datepicker.formatDate("yymmdd", dt);
+	console.log(dt);
+}
+
+$(onLoad);
+</script>
+</head>
+<body>
+<h1>Testing out datetimepicker jquery plugin</h1>
+<br/><p/>
+<input id='datetimepicker'/>
+<img id='img' src=''/>
+</img>
+</body>
+</html>
