@@ -1,3 +1,28 @@
+function extendWith (dest, source)
+{
+	for (var prop in source)
+	{
+		if (source.hasOwnProperty(prop))
+		{
+			dest[prop] = source[prop];
+		}
+	}
+}
+
+Object.prototype.extendWith =
+	function (src)
+	{
+		for (var prop in src)
+		{
+			if (src.hasOwnProperty(prop))
+			{
+				this[prop] = src[prop];
+			}
+		}
+
+		return this;
+	};
+
 function isClass (s)
 {
 	return s[0] == '.';
@@ -17,11 +42,11 @@ function append (child)
 {
 	if (typeof(child) == 'string')
 	{
-		this.arg.appendChild(document.createTextNode(child));
+		this.appendChild(document.createTextNode(child));
 	}
 	else
 	{
-		this.arg.appendChild(child);
+		this.appendChild(child);
 	}
 
 	return this;
@@ -30,29 +55,35 @@ function append (child)
 
 function css (key, value)
 {
-	this.arg.style[key] = value;
+	this.style[key] = value;
 
-	return this.arg;
+	return this;
 }
 
 
 function hide ()
 {
-	this.arg.style.visibility = 'none';
+	this.style.visibility = 'hidden';
 
-	return this.arg;
+	return this;
 
 }
 
 function show ()
 {
-	this.arg.style.visibility = 'visible';
+	this.style.visibility = 'visible';
 
-	return this.arg;
+	return this;
 }
 
 
-
+var proto = { 
+              append: append,
+              css: css,
+              hide: hide,
+              show: show
+            };
+              
 
 
 function O (arg)
@@ -75,16 +106,18 @@ function $ (arg)
 		{
 			var id = arg.substring(1);
 			var el = document.getElementById(id);
-			var o = new O(el);
-			return o;
+			el.extendWith(proto);
+			return el;
 		}
 		else if (arg.isClass())
 		{
 			var cls = arg.substring(1);
 			var els = document.getElementsByClassName(cls)
-			var el = els[0];
-			var o = new O(el);
-			return o;
+			els.append = function (arg) { for (var i=0; i<this.length; ++i) { var el = $(els[i]); el.append(arg); } return els; };
+			els.css = function (prop, value) { for (var i=0; i<this.length; ++i) { var el = $(els[i]); el.css(prop, value); } return els; };
+			els.hide = function (prop, value) { for (var i=0; i<this.length; ++i) { var el = $(els[i]); el.hide(prop, value); } return els; };
+			els.show = function (prop, value) { for (var i=0; i<this.length; ++i) { var el = $(els[i]); el.show(prop, value); } return els; };
+			return els;
 		}
 		else
 		{
@@ -94,7 +127,8 @@ function $ (arg)
 	}
 	else if (typeof(arg) == 'object')
 	{
-		var o = arg;
+		arg.extendWith(proto);	
+		return arg;
 	}
 	else if (typeof(arg) == 'function')
 	{
