@@ -1,0 +1,15 @@
+Package: extundelete
+Status: install ok unpacked
+Priority: optional
+Section: utils
+Installed-Size: 152
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Architecture: amd64
+Version: 0.2.0-2.1
+Depends: e2fslibs (>= 1.42), libc6 (>= 2.14), libcomerr2 (>= 1.01), libgcc1 (>= 1:4.1.1), libstdc++6 (>= 4.6)
+Description: utility to recover deleted files from ext3/ext4 partition
+ extundelete uses the information stored in the partition's journal to attempt
+ to recover a file that has been deleted. There is no guarantee that any
+ particular file will be able to be undeleted.
+Original-Maintainer: Debian Forensics <forensics-devel@lists.alioth.debian.org>
+Homepage: http://extundelete.sourceforge.net/
