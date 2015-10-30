@@ -9,6 +9,14 @@ import ssl
 import urllib.request
 import zipfile
 
+def adjust (dt, weeks=0, days=0, hours=0, minutes=0, seconds=0, milliseconds=0, microseconds=0):
+	localVars = dict(locals())
+	del localVars['dt']
+	td = datetime.timedelta(**localVars)
+	dtNew = dt + td
+	return dtNew
+
+
 def askYesNoChoice (prompt, default=None):
 	if default == None:	
 		prompt = prompt + (" (y/n) ")
@@ -30,6 +38,22 @@ def askYesNoChoice (prompt, default=None):
 			print("Invalid choice: " + sChoice)
 	return choice	
 
+
+def askMultiChoice (prompt, charChoices, default=None):
+	sChoices = charChoices.join(' ')
+	prompt = "{} ({}): ".format(prompt, sChoices)
+	done = False
+	while not done:
+		choice = input(prompt)
+		if len(choice) != 1:
+			print("Please enter a single character")
+		elif choice[0] not in charChoices:
+			print("Please enter a valid choice")
+		else:
+			done = True
+	return choice
+			
+				
 
 def createContext (certPath, caPath):
 	ctx = ssl.SSLContext(ssl.PROTOCOL_SSLv23)

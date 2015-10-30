@@ -11,18 +11,6 @@ from ReportListing import ReportListing
 from TimeDelta2 import TimeDelta2
 
 
-def adjust (dt, weeks=0, days=0, hours=0, minutes=0, seconds=0, milliseconds=0, microseconds=0):
-	localVars = dict(locals())
-	del localVars['dt']
-	td = datetime.timedelta(**localVars)
-	dtNew = dt + td
-	return dtNew
-	
-def randomMicros (dt):
-	microseconds = random.randrange(0, 1000000, 1)
-	dtNew = adjust(dt, microseconds=microseconds)
-	return dtNew
-
 def testDelta (delta):
 	sDelta = getDeltaString(delta)
 	print("{:32}{:32}".format(str(delta), sDelta))
