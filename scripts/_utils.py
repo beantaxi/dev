@@ -6,6 +6,7 @@ import logging
 import os.path
 import shutil
 import ssl
+import sys
 import urllib.request
 import zipfile
 
@@ -55,10 +56,10 @@ def askMultiChoice (prompt, charChoices, default=None):
 			
 				
 
-def createContext (certPath, caPath):
+def createContext (clientCertPath, caCertPath):
 	ctx = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
-	ctx.load_cert_chain(certPath)
-	ctx.load_verify_locations(caPath)
+	ctx.load_cert_chain(clientCertPath)
+	ctx.load_verify_locations(caCertPath)
 	return ctx
 
 def createCookieProcessor (cookieJar=None):
@@ -68,10 +69,20 @@ def createCookieProcessor (cookieJar=None):
 	return cookieProcessor
 
 
-def createHttpsHandler (certPath, caPath):
-	ctx = createContext(certPath=certPath, caPath=caPath)
+def createHttpsHandler (clientCertPath, caCertPath):
+	ctx = createContext(clientCertPath=clientCertPath, caCertPath=caCertPath)
 	httpsHandler = urllib.request.HTTPSHandler(context=ctx)
 	return httpsHandler
+
+def getCertPath (certName):
+	if sys.platform == 'linux':
+		homeFolder = os.path.expanduser('~')
+		certFolder = os.path.join(homeFolder, '.ssh')
+		certPath = os.path.join(certFolder, certName)
+	else:
+		raise("{} is not supported at this time".format(sys.platform))
+	return certPath
+	
 
 def roundTime (t, delta=datetime.timedelta(minutes=1)):
 	seconds = t.hour*3600 + t.minute*60 + t.second
