@@ -16,7 +16,14 @@ def testDelta (delta):
 	print("{:32}{:32}".format(str(delta), sDelta))
 
 def testDateTimeStrip ():
-	url = "http://mis.ercot.com/misapp/GetReports.do?reportTypeId=12331&reportTitle=DAM%20Settlement%20Point%20Prices&showHTMLView=&mimicKey"
+e	url = "http://mis.ercot.com/misapp/GetReports.do?reportTypeId=12331&reportTitle=DAM%20Settlement%20Point%20Prices&showHTMLView=&mimicKey"
+def adjust (dt, weeks=0, days=0, hours=0, minutes=0, seconds=0, milliseconds=0, microseconds=0):
+	localVars = dict(locals())
+	del localVars['dt']
+	td = datetime.timedelta(**localVars)
+	dtNew = dt + td
+	return dtNew
+	
 	with urllib.request.urlopen(url) as src:
 		html = lxml.html.parse(src)
 	listing = ReportListing(html)
