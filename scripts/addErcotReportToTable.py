@@ -121,7 +121,7 @@ class GetSchedule (Stage):
 		printTimeLine("Max", tMax, roundedMax)
 		printTimeLine("Avg", tAvg, roundedAvg)
 		print()
-		input("Would you like to choose the rounded Min, Max, Avg, or other? (N, X, A, I) ")
+		askMultipleChoice("Would you like to choose the rounded Min, Max, Avg, or other? (N, X, A, I) ")
 
 def printTimeLine (label, time, roundedTime):
 	timeFormat = "%H:%M:%S"

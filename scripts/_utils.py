@@ -41,11 +41,17 @@ def askYesNoChoice (prompt, default=None):
 
 
 def askMultiChoice (prompt, charChoices, default=None):
-	sChoices = charChoices.join(' ')
-	prompt = "{} ({}): ".format(prompt, sChoices)
+	charChoices = charChoices.lower()
+	sChoices = ' '.join(list(charChoices))
+	if default:
+		sChoices = sChoices.replace(default.lower(), default.upper())
+	logging.debug("sChoices=" + sChoices)
+	prompt = "{} [{}]: ".format(prompt, sChoices)
 	done = False
 	while not done:
-		choice = input(prompt)
+		choice = input(prompt).lower()
+		if len(choice) == 0 and default:
+			choice = default.lower()
 		if len(choice) != 1:
 			print("Please enter a single character")
 		elif choice[0] not in charChoices:
