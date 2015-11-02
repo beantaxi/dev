@@ -122,7 +122,7 @@ class GetSchedule (Stage):
 		printTimeLine("Avg", tAvg, roundedAvg)
 		print()
 		prompt = "Would you like to choose the rounded Min, Max, Avg, or other?"
-		choices = "NXAI"
+		choices = "NXAO"
 		choice = _utils.askMultiChoice(prompt, choices)
 		debug("choice=" + choice)
 

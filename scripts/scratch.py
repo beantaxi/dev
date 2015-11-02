@@ -16,14 +16,7 @@ def testDelta (delta):
 	print("{:32}{:32}".format(str(delta), sDelta))
 
 def testDateTimeStrip ():
-e	url = "http://mis.ercot.com/misapp/GetReports.do?reportTypeId=12331&reportTitle=DAM%20Settlement%20Point%20Prices&showHTMLView=&mimicKey"
-def adjust (dt, weeks=0, days=0, hours=0, minutes=0, seconds=0, milliseconds=0, microseconds=0):
-	localVars = dict(locals())
-	del localVars['dt']
-	td = datetime.timedelta(**localVars)
-	dtNew = dt + td
-	return dtNew
-	
+	url = "http://mis.ercot.com/misapp/GetReports.do?reportTypeId=12331&reportTitle=DAM%20Settlement%20Point%20Prices&showHTMLView=&mimicKey"
 	with urllib.request.urlopen(url) as src:
 		html = lxml.html.parse(src)
 	listing = ReportListing(html)
@@ -80,7 +73,16 @@ def testGetStartTime ():
 		sStartTime = time.strftime("%H:%M:%S", startTime)
 		print("startTime={}".format(sStartTime))
 
+def testAskMultiChoice ():
+	prompt = "Would you like to choose the rounded Min, Max, Avg, or Other?"
+	choices = 'NXAO'
+	choice = _utils.askMultiChoice(prompt, choices, 'N')
+	print("choice=" + choice)
+	
+
+
 if __name__ == '__main__':
 	# testGetStartTime()
-	testDateTimeStrip()
+	# testDateTimeStrip()
+	testAskMultiChoice()
 
