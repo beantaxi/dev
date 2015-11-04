@@ -19,7 +19,8 @@ import X
 import abc
 import argparse
 import colorama
-import crontab
+import config
+from crontab import CronTab
 import datetime
 import distutils.util
 import lxml.html
@@ -71,12 +72,12 @@ class GetReportInfo (Stage):
 		data['reportInfo'] = reportInfo
 		return data
 
+
 class GetSchedule (Stage):
 	@classmethod
 	def askForInterval ():
 		prompt = "Choose Daily, Hourly, or Five Minute interval (D, H, 5): "
 		interval = input(prompt)	
-		
 
 	@classmethod
 	def getStartTime (cls, datetimes, interval):
@@ -212,7 +213,26 @@ def askForReportInfo (reportInfo):
 			reportInfo.id = newId
 			reportInfo.name = newName
 	return reportInfo
+
+
+def addCronEntry (startTime, interval):
+	reportId = reportInfo.id
+	cmd = "{} {} {}".format(config.pythonPath, config.scriptPath, reportId)
+	if interval == IntervalEnum.DAILY:
+		cron = _utils.createDailyCron(startTime)
+	else:
+		cron = _utils.createFiveMinuteCron(startTime)
+	logging.debug("cron=" + cron)
+	_utils.printFancy("Appending this line to cron file", background=colorama.Back.GREEN)
+	print()
+	print(cron + ' ' + cmd)
+	crontab = CronTab(user=True)
+	job = crontab.new(command=cmd)
+	job.setall(cron)
+	job.enable()
+	crontab.write()
 	
+
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description="Parse a report URL and add it to the report table.")
 
@@ -241,24 +261,7 @@ if __name__ == "__main__":
 	stage.execute(data)
 	interval = data['interval']
 	startTime = data['startTime']
-	print("OK, we'll go with a starttime of " + str(startTime))
-	pythonPath = "/home/ubuntu/dev/py/venv/main/bin/python3" 
-	pythonScript = "/home/ubuntu/work/euclid/scripts/getReportListing.py"
-	reportId = reportInfo.id
-	cmd = "{} {} {}".format(pythonPath, pythonScript, reportId)
-	if interval == IntervalEnum.DAILY:
-		cron = _utils.createDailyCron(startTime)
-	else:
-		cron = _utils.createFiveMinuteCron(startTime)
-	logging.debug("cron=" + cron)
-	_utils.printFancy("Appending this line to cron file", background=colorama.Back.GREEN)
-	print()
-	print(cron + ' ' + cmd)
-	crontab = crontab.CronTab(user=True)
-	job = crontab.new(command=cmd)
-	job.setall(cron)
-	job.enable()
-	crontab.write()
+	addCronEntry(startTime, interval)
 
 # Prompt if they are ok
 
