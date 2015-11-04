@@ -7,6 +7,7 @@ import os.path
 import shutil
 import ssl
 import sys
+import time
 import urllib.request
 import zipfile
 
@@ -16,6 +17,30 @@ def adjust (dt, weeks=0, days=0, hours=0, minutes=0, seconds=0, milliseconds=0, 
 	td = datetime.timedelta(**localVars)
 	dtNew = dt + td
 	return dtNew
+
+
+def askDatetime (prompt, fmt):
+	done = False
+	while not done:
+		try:
+			sDatetime = input(prompt)
+			dt = datetime.datetime.strptime(sDatetime, fmt)
+			done = True
+		except ValueError:
+			print(colorama.Fore.RED + "Please enter a valid date/time in the proper format")
+	return dt
+
+
+def askTime (prompt, fmt="%H:%M:%S"):
+	done = False
+	while not done:
+		try:
+			sTime = input(prompt)
+			t = datetime.datetime.strptime(sTime, fmt).time()
+			done = True
+		except ValueError:
+			print(colorama.Fore.RED + "Please enter a valid time in the proper format")
+	return t
 
 
 def askYesNoChoice (prompt, default=None):
@@ -42,7 +67,7 @@ def askYesNoChoice (prompt, default=None):
 
 def askMultiChoice (prompt, charChoices, default=None):
 	charChoices = charChoices.lower()
-	sChoices = ' '.join(list(charChoices))
+	sChoices = ''.join(list(charChoices))
 	if default:
 		sChoices = sChoices.replace(default.lower(), default.upper())
 	logging.debug("sChoices=" + sChoices)
@@ -74,6 +99,20 @@ def createCookieProcessor (cookieJar=None):
 	cookieProcessor = urllib.request.HTTPCookieProcessor(cookieJar)
 	return cookieProcessor
 
+def createDailyCron (t):
+	h = t.hour
+	m = t.minute
+	fmt = "{} {} * * *"
+	cron = fmt.format(m, h)
+	return cron
+
+def createFiveMinuteCron (t):
+	seq = range(0,12)  
+	minutes = [str(t.minute + 5*m) for m in seq]
+	sMinutes = ','.join(minutes)
+	fmt = "{} * * * *"
+	cron = fmt.format(sMinutes)
+	return cron
 
 def createHttpsHandler (clientCertPath, caCertPath):
 	ctx = createContext(clientCertPath=clientCertPath, caCertPath=caCertPath)
@@ -99,16 +138,16 @@ def roundTime (t, delta=datetime.timedelta(minutes=1)):
 	roundedTime = datetime.time(h, m, s)
 	return roundedTime
 
-def timeMinMaxAvg (datetimes):
+def timeMinMaxAvg (times):
 	min = max = avg = None
 	totalSeconds = 0
-	for dt in datetimes:
-		if not min or dt.time() < min:
-			min = dt.time()
-		if not max or dt.time() > max:
-			max = dt.time()
-		totalSeconds += dt.hour*3600 + dt.minute*60 + dt.second
-	avgSeconds = totalSeconds // len(datetimes)
+	for t in times:
+		if not min or t < min:
+			min = t
+		if not max or t > max:
+			max = t
+		totalSeconds += t.hour*3600 + t.minute*60 + t.second
+	avgSeconds = totalSeconds // len(times)
 	h, leftover = divmod(avgSeconds, 3600)
 	m, s = divmod(leftover, 60)
 	logging.debug("h={} m={} s={}".format(str(h), str(m), str(s)))
@@ -125,8 +164,10 @@ def calcHms (seconds):
 
 def ceilTime (t, delta):
 	seconds = t.hour*3600 + t.minute*60 + t.second
+	logging.debug("seconds=" + str(seconds))
 	roundedSeconds = (seconds + delta.seconds) // delta.seconds * delta.seconds
 	(h, m, s) = calcHms(roundedSeconds)
+	logging.debug("h={} m={} s={}".format(int(h), int(m), int(s)))
 	roundedTime = datetime.time(h, m, s)
 	return roundedTime
 	
@@ -161,6 +202,14 @@ def getDeltas (dateTimes, descending=False):
 		dtLast = dtCurr
 	return deltas
 
+
+def modTo5Minutes (dt):
+	tOrig = dt.time();
+	h = 0
+	m = tOrig.minute % 5
+	s = tOrig.second
+	t = datetime.time(h, m, s)
+	return t
 
 def printAlternating (lines, style1, style2):
 	for i in range(0, len(lines)):

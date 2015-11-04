@@ -19,6 +19,7 @@ import X
 import abc
 import argparse
 import colorama
+import crontab
 import datetime
 import distutils.util
 import lxml.html
@@ -29,7 +30,9 @@ import urllib.request
 import _ercotReportTable
 import _getReportUrlInfo
 import _utils
+from FutureTechEx import FutureTechEx
 from IntervalCalculator import IntervalCalculator
+from IntervalCalculator import IntervalEnum
 from TimeDelta2 import TimeDelta2
 from ReportListing import ReportListing
 
@@ -75,6 +78,61 @@ class GetSchedule (Stage):
 		interval = input(prompt)	
 		
 
+	@classmethod
+	def getStartTime (cls, datetimes, interval):
+		print("It looks like the report has the following times")
+		if interval == IntervalEnum.DAILY:
+			times = [dt.time() for dt in datetimes]
+			(tMin, tMax, tAvg) = _utils.timeMinMaxAvg(times)
+			rounding = datetime.timedelta(minutes=5)
+			roundedMin = _utils.floorTime(tMin, rounding)
+			roundedMax = _utils.ceilTime(tMax, rounding)
+			roundedAvg = _utils.roundTime(tAvg, rounding)
+			printTimeLine("Min", tMin, roundedMin)
+			printTimeLine("Max", tMax, roundedMax)
+			printTimeLine("Avg", tAvg, roundedAvg)
+			print()
+			promptFmt = "Would you like to choose the rounded Mi{0}n{1}, Ma{0}x{1}, {0}A{1}vg, or {0}O{1}ther?"
+			prompt = promptFmt.format(colorama.Fore.BLUE + colorama.Style.BRIGHT, colorama.Style.RESET_ALL)
+			choices = "nxao"
+			choiceMap = {'n': roundedMin, 'x': roundedMax, 'a': roundedAvg}
+			choice = _utils.askMultiChoice(prompt, choices)
+			logging.debug("choice=" + choice)
+			if choice in choiceMap:
+				startTime = choiceMap[choice]
+			else:
+				startTime = _utils.askTime("What time would you like? [HH:MM] ", "%H:%M")
+		elif interval == IntervalEnum.FIVE_MINUTES:
+			times = [_utils.modTo5Minutes(dt) for dt in datetimes]
+			(tMin, tMax, tAvg) = _utils.timeMinMaxAvg(times)
+			rounding = datetime.timedelta(seconds=1)
+			roundedMin = _utils.floorTime(tMin, rounding)
+			roundedMax = _utils.ceilTime(tMax, rounding)
+			roundedAvg = _utils.roundTime(tAvg, rounding)
+			printTimeLine("Min", tMin, roundedMin)
+			printTimeLine("Max", tMax, roundedMax)
+			printTimeLine("Avg", tAvg, roundedAvg)
+			print()
+			promptFmt = "Would you like to choose the rounded Mi{0}n{1}, Ma{0}x{1}, {0}A{1}vg, or {0}O{1}ther?"
+			prompt = promptFmt.format(colorama.Fore.BLUE + colorama.Style.BRIGHT, colorama.Style.RESET_ALL)
+			choices = "nxao"
+			choiceMap = {'n': roundedMin, 'x': roundedMax, 'a': roundedAvg}
+			choice = _utils.askMultiChoice(prompt, choices)
+			logging.debug("choice=" + choice)
+			if choice in choiceMap:
+				startTime = choiceMap[choice]
+			else:
+				startTime = _utils.askTime("What time would you like? [MM:SS] ", "%M:%S")
+			logging.debug("startTime=" + str(startTime))
+
+			# Create a strip of the times, modding the minutes by 5
+			# Check out time min max rounding on that. Maybe the method should know how.
+			# The rest I guess will fall out of that.
+		else:
+			raise FutureTechEx("No support for interval=" + str(interval))
+		return startTime
+
+
 	def execute (self, data):
 		print()
 		_utils.printFancy("Get Schedule", background=colorama.Back.BLUE)
@@ -109,26 +167,15 @@ class GetSchedule (Stage):
 			print()
 		else:
 			interval = askForInterval()
-		(tMin, tMax, tAvg) = _utils.timeMinMaxAvg(reportDateTimes)
-		_utils.printFancy("Choose a schedule", background=colorama.Back.BLUE)
-		print()
-		print("It looks like the report has the following times")
-		rounding = datetime.timedelta(minutes=5)
-		roundedMin = _utils.floorTime(tMin, rounding)
-		roundedMax = _utils.ceilTime(tMax, rounding)
-		roundedAvg = _utils.roundTime(tAvg, rounding)
-		printTimeLine("Min", tMin, roundedMin)
-		printTimeLine("Max", tMax, roundedMax)
-		printTimeLine("Avg", tAvg, roundedAvg)
-		print()
-		prompt = "Would you like to choose the rounded Min, Max, Avg, or other?"
-		choices = "NXAO"
-		choice = _utils.askMultiChoice(prompt, choices)
-		debug("choice=" + choice)
+		data['interval'] = interval
 
-def printTimeLine (label, time, roundedTime):
+		startTime = self.__class__.getStartTime(reportDateTimes, interval)
+		data['startTime'] = startTime
+
+
+def printTimeLine (label, t, roundedTime):
 	timeFormat = "%H:%M:%S"
-	sTime = time.strftime(timeFormat)
+	sTime = t.strftime(timeFormat)
 	sRoundedTime = roundedTime.strftime(timeFormat)
 	line = "{:5}{:18}{:18}".format(label, sTime, sRoundedTime)
 	print(line)
@@ -192,6 +239,26 @@ if __name__ == "__main__":
 	# Try and figure out schedule
 	stage = GetSchedule()
 	stage.execute(data)
+	interval = data['interval']
+	startTime = data['startTime']
+	print("OK, we'll go with a starttime of " + str(startTime))
+	pythonPath = "/home/ubuntu/dev/py/venv/main/bin/python3" 
+	pythonScript = "/home/ubuntu/work/euclid/scripts/getReportListing.py"
+	reportId = reportInfo.id
+	cmd = "{} {} {}".format(pythonPath, pythonScript, reportId)
+	if interval == IntervalEnum.DAILY:
+		cron = _utils.createDailyCron(startTime)
+	else:
+		cron = _utils.createFiveMinuteCron(startTime)
+	logging.debug("cron=" + cron)
+	_utils.printFancy("Appending this line to cron file", background=colorama.Back.GREEN)
+	print()
+	print(cron + ' ' + cmd)
+	crontab = crontab.CronTab(user=True)
+	job = crontab.new(command=cmd)
+	job.setall(cron)
+	job.enable()
+	crontab.write()
 
 # Prompt if they are ok
 

@@ -180,7 +180,7 @@ def backup ():
 	table = ErcotReportTable()
 	table.backup()
 	print()
-	print("Successfully backed up {} to {}.".format(X.TABLE_PATH, X.BACKUP_TABLE_PATH))
+	print("Successfully backed up {} to {}".format(X.TABLE_PATH, X.BACKUP_TABLE_PATH))
 
 def delete (iDelete):
 	table = ErcotReportTable()
