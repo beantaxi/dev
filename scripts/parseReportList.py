@@ -14,7 +14,7 @@ xpathReports = '''
 import argparse
 import datetime
 import urllib.request
-import _ercotReportTable
+import ExtractTable
 import X
 
 def setupArgs (argParser):
@@ -29,7 +29,7 @@ def getFilenames (htmlReportListing):
 if __name__ == '__main__':
 	ap = argparse.ArgumentParser(description=description)
 	args = setupArgs(ap)
-	html = _ercotReportTable.getReport(args.whichReport)
+	html = ExtractTable.getReport(args.whichReport)
 	filenames = getFilenames(html)
 	dtLast = None
 	for filename in filenames:

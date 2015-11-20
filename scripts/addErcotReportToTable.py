@@ -28,7 +28,7 @@ import logging
 import time
 import urllib.parse
 import urllib.request
-import _ercotReportTable
+import ExtractTable
 import _getReportUrlInfo
 import _utils
 from FutureTechEx import FutureTechEx
@@ -251,7 +251,7 @@ if __name__ == "__main__":
 	stage = GetReportInfo()
 	stage.execute(data)
 	reportInfo = data['reportInfo']
-	_ercotReportTable.addReportInfo(reportInfo)
+	ExtractTable.addReportInfo(reportInfo)
 	msg = "'{}' (id={}) has been added to the report table.".format(reportInfo.name, reportInfo.id)
 	print()
 	print(colorama.Back.GREEN + msg)

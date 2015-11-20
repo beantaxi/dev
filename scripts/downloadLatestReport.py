@@ -8,7 +8,7 @@ import urllib.parse
 import urllib.request
 import zipfile
 # import createErcotUrl
-import _ercotReportTable
+import ExtractTable
 import _utils
 
 xpathCsvFilename = "//tr[td[@class='labelOptional_ind'][text()[contains(., '_csv')]]]/td[1]/text()"
@@ -63,7 +63,7 @@ def getReportUrlAndFilename (urlReportListing, format='csv'):
 
 if __name__ == "__main__":
 	arg = sys.argv[1]
-	url = _ercotReportTable.getReportUrl(arg)
+	url = ExtractTable.getReportUrl(arg)
 	downloadLatestReport(url)
 
 # reportName = argv[1]
