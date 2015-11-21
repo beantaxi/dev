@@ -11,5 +11,3 @@ with open(heartbeatFile, "a") as dst:
 	idExtract = sys.argv[1]
 	s = "{} - {}".format(now, idExtract)
 	print(s, file=dst)
-
-

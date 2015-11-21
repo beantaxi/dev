@@ -1,4 +1,3 @@
-import X
 import argparse
 import csv
 import lxml.html
@@ -8,8 +7,13 @@ import shutil
 import tempfile
 import urllib.parse
 import _utils
+import Constants
 
 class ExtractTable:
+	def __init__ (self, tablePath, backupPath, tempTablePath):
+		self.tablePath = tablePath
+		self.backupPath = backupPath
+		self.tempTablePath = tempTablePath
 
 	def __getitem__ (self, i):
 		data = self.all()
@@ -29,7 +33,7 @@ class ExtractTable:
 		return data
 
 	def backup (self):
-		shutil.copy2(X.TABLE_PATH, X.BACKUP_TABLE_PATH)
+		shutil.copy2(self.tablePath, self.backupPath)
 
 	def delete (self, iDelete):
 		all = self.all()
@@ -42,10 +46,10 @@ class ExtractTable:
 
 	def _backupTable (self):
 		# Rename current file to bak
-		os.rename(X.TABLE_PATH, X.BACKUP_TABLE_PATH)
+		os.rename(self.tablePath, self.backupPath)
 		
 	def doesBackupExist (self):
-		flag = os.path.exists(X.BACKUP_TABLE_PATH)
+		flag = os.path.exists(self.backupPath)
 		return flag
 
 	def getExtractInfo (self, arg):
@@ -90,14 +94,18 @@ class ExtractTable:
 		return info
 
 	def restoreFromBackup (self):
-		shutil.copy2(X.BACKUP_TABLE_PATH, X.TABLE_PATH)
+		shutil.copy2(self.backupPath, self.tablePath)
 
-	def _openCsvReader (self, filename=X.TABLE_PATH):
+	def _openCsvReader (self, filename=None):
+		if filename == None:
+			filename = self.tablePath
 		f = open(filename, mode='r', newline='')
 		csvReader = csv.reader(f, quoting=csv.QUOTE_NONNUMERIC)
 		return csvReader
 
-	def _openCsvWriter (self, filename=X.TABLE_PATH):
+	def _openCsvWriter (self, filename=None):
+		if filename == None:
+			filename = self.tablePath
 		f = open(filename, mode='a', newline='')
 		csvWriter = csv.writer(f, quoting=csv.QUOTE_NONNUMERIC)
 		return csvWriter
@@ -110,13 +118,13 @@ class ExtractTable:
 	def _switchToTempTable (self):
 		self._backupTable()
 		# Rename temp file to current file
-		os.rename(X.TEMP_TABLE_PATH, X.TABLE_PATH)
+		os.rename(self.tempTablePath, self.tablePath)
 
 	def _writeRow (self, csvWriter, extractInfo):
 		csvWriter.writerow([extractInfo.id, extractInfo.name, extractInfo.url])
 
 	def _writeRowToTempTable (self, extractInfo):
-		csvWriter = self._openCsvWriter(X.TEMP_TABLE_PATH)
+		csvWriter = self._openCsvWriter(self.tempTablePath)
 		self._writeRow(csvWriter, extractInfo)
 
 		
@@ -142,48 +150,17 @@ class ExtractInfo:
 		return sInfo
 
 
-def addExtractInfo (extractInfo):
-	extractTable = ExtractTable()
-	extractTable.add(extractInfo)
-
-
-def addRow (id, name, url):
+def addRow (table, id, name, url):
 	extractInfo = ExtractInfo(id, name, url)
-	addExtractInfo(extractInfo)
+	table.add(extractInfo)
 
 
-def printTable (path):
-	with open(X.TABLE_PATH) as extractTable:
-		csvReader = csv.reader(extractTable)
-		for row in csvReader:
-			print(row)
-
-
-def parseArgs ():
-	s = "Simple tool for managing the ERCOT extract table"
-	argParser = argparse.ArgumentParser()
-	argParser.add_argument("--add-row", nargs=3, dest='addRow')
-	argParser.add_argument("--backup", action='store_true')
-	argParser.add_argument("--delete", nargs=1)
-	argParser.add_argument("--download-extract-list", nargs=1, dest='downloadExtractList')
-	argParser.add_argument("--get-url", nargs=1, dest='getUrl')
-	argParser.add_argument("--list", action="store_true")
-	argParser.add_argument("--list-details", action='store_true', dest='listDetails')
-	argParser.add_argument("--manage", action="store_true")
-	argParser.add_argument("--recover", action="store_true")
-	argParser.add_argument("--test", action="store_true")
-	args = argParser.parse_args()
-	return args
-
-
-def backup ():
-	table = ExtractTable()
+def backup (table):
 	table.backup()
 	print()
-	print("Successfully backed up {} to {}".format(X.TABLE_PATH, X.BACKUP_TABLE_PATH))
+	print("Successfully backed up {} to {}".format(table.tablePath, table.backupPath))
 
-def delete (iDelete):
-	table = ExtractTable()
+def delete (table, iDelete):
 	try:
 		extractInfo = table[iDelete]
 		s = "{0:<4}{1}".format(iDelete, extractInfo)
@@ -200,16 +177,14 @@ def delete (iDelete):
 	print()
 
 
-def downloadExtractList (arg):
-	table = ExtractTable()
-	info = table.getExtractInfo(arg)
-	filename = info.id + '.html'
-	path = os.path.join(X.LISTINGS_FOLDER, filename)
-	print("Downloading {} ...".format(info.url))
-	with urllib.request.urlopen(info.url) as src, open(path, "wb") as dst:
-		shutil.copyfileobj(src, dst)
-	print("Downloaded {}.".format(filename))	
-	
+# def downloadExtractList (table, arg):
+# 	info = table.getExtractInfo(arg)
+# 	filename = info.id + '.html'
+# 	path = os.path.join(Constants.LISTINGS_FOLDER, filename)
+# 	print("Downloading {} ...".format(info.url))
+# 	with urllib.request.urlopen(info.url) as src, open(path, "wb") as dst:
+# 		shutil.copyfileobj(src, dst)
+# 	print("Downloaded {}.".format(filename))	
 
 def getInfoByIndex (index):
 	rows = readTable()
@@ -248,8 +223,7 @@ def getExtractId (arg):
 	return idExtract
 
 
-def getExtract (arg):
-	table = ExtractTable()
+def getExtract (table, arg):
 	extractInfo = table.getExtractInfo(arg)
 	url = extractInfo.url
 	src = urllib.request.urlopen(url)
@@ -263,15 +237,13 @@ def getExtractUrl (arg):
 	return url
 
 
-def getUrl (arg):
-	table = ExtractTable()
+def getUrl (table, arg):
 	extractInfo = table.getExtractInfo(arg)
 	print(extractInfo.url)
 
 
-def list ():
+def list (table):
 	print()
-	table = ExtractTable()
 	data = table.all()
 	for i in range(0, len(data)):
 		extractInfo = data[i]
@@ -280,8 +252,7 @@ def list ():
 		print(sRow)
 	print()
 
-def listDetails ():
-	table = ExtractTable()
+def listDetails (table):
 	print()
 	data = table.all()
 	i = 0
@@ -308,15 +279,14 @@ def printRow (i, highlight=None):
 
 def readTable ():
 	rows = []
-	with open(X.TABLE_PATH) as extractTable:
+	with open(Constants.TABLE_PATH) as extractTable:
 		csvReader = csv.reader(extractTable)
 		for row in csvReader:
 			rows.append(row)
 	return rows
 
 
-def recover ():
-	table = ExtractTable()
+def recover (table):
 	print()
 	if not table.doesBackupExist():
 		print("No backup exists - recover aborted")
@@ -335,32 +305,46 @@ def recover ():
 def test ():
 	pass
 
+def parseArgs ():
+	s = "Simple tool for managing the ERCOT extract table"
+	argParser = argparse.ArgumentParser()
+	argParser.add_argument("--add-row", nargs=3, dest='addRow')
+	argParser.add_argument("--backup", action='store_true')
+	argParser.add_argument("--delete", nargs=1)
+	argParser.add_argument("--download-extract-list", nargs=1, dest='downloadExtractList')
+	argParser.add_argument("--get-url", nargs=1, dest='getUrl')
+	argParser.add_argument("--list", action="store_true")
+	argParser.add_argument("--list-details", action='store_true', dest='listDetails')
+	argParser.add_argument("--manage", action="store_true")
+	argParser.add_argument("--recover", action="store_true")
+	argParser.add_argument("--test", action="store_true")
+	args = argParser.parse_args()
+	return args
+
+
 if __name__ == "__main__":
+	table = ExtractTable(Constants.TABLE_PATH, Constants.BACKUP_TABLE_PATH, Constants.TEMP_TABLE_PATH)
 	args = parseArgs()
 	if args.addRow:
 		id = args.addRow[0]
 		name = args.addRow[1]
 		url = args.addRow[2]
-		addRow(id, name, url)
+		addRow(table, id, name, url)
 	elif args.backup:
-		backup()
+		backup(table)
 	elif args.delete:
-		n = int(args.delete[0])
-		delete(n)
-	elif args.downloadExtractList:
-		arg = args.downloadExtractList[0]
-		downloadExtractList(arg)
+		iDelete = int(args.delete[0])
+		delete(table, iDelete)
 	elif args.getUrl:
 		arg = args.getUrl[0]
-		getUrl(arg)
+		getUrl(table, arg)
 	elif args.list:
-		list()
+		list(table)
 	elif args.listDetails:
-		listDetails()
+		listDetails(table)
 	elif args.manage:
-		manage()
+		manage(table)
 	elif args.recover:
-		recover()
+		recover(table)
 	elif args.test:
 		test()
-	# printTable(X.TABLE_PATH)

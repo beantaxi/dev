@@ -228,14 +228,18 @@ def printFancy (s, highlight=None, background=None):
 	if (highlight): print(highlight*len(s))
 
 
-# Returns an open stream to the zipped file.
+# Returns an open stream to the zipped file
 # Assumes zipfile is a simple zipped file - there should be only one entry in this zip file.
 # If not, throws an ex.
-def unzip (sZipfile):
-	zip = zipfile.ZipFile(sZipfile)
-	infolist = zip.infolist()
-	if len(infolist) != 1:
-		raise Exception("{} contains more than one entry.".format(sZipfile))
-	ze = infolist[0]
-	src = zip.open(ze)
-	return src
+def unzip (sZipfile, folder=None):
+	if not folder:
+		folder = os.getcwd()
+	with zipfile.ZipFile(sZipfile) as zip:
+		infolist = zip.infolist()
+		if len(infolist) != 1:
+			raise Exception("{} contains more than one entry.".format(sZipfile))
+		zi = infolist[0]
+		data = zip.extract(zi, path=folder)
+		path = os.path.join(folder, zi.filename)
+	return path
+		

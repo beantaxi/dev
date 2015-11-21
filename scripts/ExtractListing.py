@@ -10,8 +10,9 @@ import _utils
 
 class ExtractListing:
 	XPATH = "//tr[td[1][@class='labelOptional_ind'][text()[contains(., '_csv.zip')]]]/td[1]/text() | //tr[td[1][@class='labelOptional_ind'][text()[contains(., '_csv.zip')]]]/td[4]//div/a/@href"
-	def __init__ (self):
-		pass
+	def __init__ (self, pathOrUrl=None):
+		if pathOrUrl:
+			self.load(pathOrUrl)
 
 	@staticmethod
 	def getDateTime (extractFilename):
@@ -22,7 +23,6 @@ class ExtractListing:
 		sDateTimeFormat = '%Y%m%d%H%M%S%f'
 		dt = datetime.datetime.strptime(sDateTime, sDateTimeFormat)
 		return dt
-	
 
 	@staticmethod
 	def isDailyExtract (extractDateTimes):
@@ -34,20 +34,16 @@ class ExtractListing:
 	def parseExtractInfo (cls, html):
 		results = html.xpath(cls.XPATH)
 		nRows = int(len(results)/2)
-		print("nRows={}".format(nRows))
 		extracts = {}
 		for i in range(0, nRows):
 			filename = results[i*2].strip()
-			url = results[i*2+1].strip()
+			url = "https://mis.ercot.com" + results[i*2+1].strip()
 			datetime = ExtractListing.getDateTime(filename)
 			extracts[datetime] = {'filename': filename, 'url': url}
 		od = OrderedDict()
 		for key in sorted(extracts, reverse=True):
 			od[key] = extracts[key]
 		return od
-			
-
-
 
 	def getDateTimes (self):
 		dateTimes = [ExtractListing.getDateTime(s) for s in self.getExtractFilenames()]
@@ -63,10 +59,9 @@ class ExtractListing:
 		extractFilenames = self.html.xpath(xpathExtractFilenames)
 		return extractFilenames
 
-	def load (self, url):
-		with urllib.request.urlopen(url) as src:
-			self.html = lxml.html.parse(src)
-			self.parseExtractInfo()
+	def load (self, pathOrUrl):
+		self.html = lxml.html.parse(pathOrUrl)
+		self.extractInfo = self.__class__.parseExtractInfo(self.html)
 
 if __name__ == '__main__':
 	argparse = argparse.ArgumentParser()
