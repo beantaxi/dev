@@ -9,7 +9,7 @@ import urllib.request
 import _utils
 from IntervalCalculator import IntervalCalculator
 from IntervalCalculator import IntervalEnum
-from ReportListing import ReportListing
+from ExtractListing import ExtractListing
 from TimeDelta2 import TimeDelta2
 
 
@@ -30,7 +30,7 @@ def testDateTimeStrip ():
 	url = "https://mis.ercot.com/misapp/GetReports.do?reportTypeId=11485&noOfDaysofArchive=3&reportTitle=LMPs%20by%20Electrical%20Bus&showHTMLView=undefined&mimicKey="
 	with urllib.request.urlopen(url) as src:
 		html = lxml.html.parse(src)
-	listing = ReportListing(html)
+	listing = ExtractListing(html)
 	times = [modTo5Minutes(dt) for dt in listing.getDateTimes()]
 	(min, max, avg) = _utils.timeMinMaxAvg(times)
 	print("{:24}{:24}{:24}".format(str(min), str(max), str(avg)))
@@ -66,7 +66,7 @@ def test2 ():
 def getTestDeltas (url):
 	with urllib.request.urlopen(url) as src:
 		html = lxml.html.parse(src)
-		listing = ReportListing(html)
+		listing = ExtractListing(html)
 		dateTimes = listing.getDateTimes()
 		deltas = []
 		for i in range(0, len(dateTimes)-1):

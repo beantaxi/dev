@@ -32,7 +32,7 @@ class IntervalCalculator:
 		
 
 	@staticmethod
-	def _getDailyStartTime (dtReport):
+	def _getDailyStartTime (dtExtract):
 		# Get the average
 		# Chuck outliers
 		# Get the average again

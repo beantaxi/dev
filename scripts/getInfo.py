@@ -2,26 +2,26 @@
 #
 # getInfo.py
 #
-# Process a python report URL, and add it to the report table.
+# Process a python extract URL, and add it to the extract table.
 #
-# The URL is parsed for the report id and name. The user is then
+# The URL is parsed for the extract id and name. The user is then
 # presented these values, and given a chance to take them as-is,
 # or to alter them. (This is primarily intended to allow for a name
-# change on very long report names - I'm not sure there is actually
+# change on very long extract names - I'm not sure there is actually
 # a reason to support changing the id but it's there anyway.
 #
 # Once the user is happy with the changes, they will get appended
-# to the end of the report table, defined by TABLE_PATH.
+# to the end of the extract table, defined by TABLE_PATH.
 #
 
-TABLE_PATH = "/home/chrissy/work/euclid/scripts/ercotReportTable.txt"
+TABLE_PATH = "/home/chrissy/work/euclid/scripts/ercotExtractTable.txt"
 
 import argparse
 import sys
 import distutils.util
 import urllib.parse
 import urllib.request
-import _getReportUrlInfo
+import _getExtractUrlInfo
 
 def printInfo (info):
 	fmt = "{:<6} {}"
@@ -85,14 +85,14 @@ def appendNewInfo (info):
 
 
 if __name__ == "__main__":
-	parser = argparse.ArgumentParser(description="Parse a report URL and add it to the report table.")
+	parser = argparse.ArgumentParser(description="Parse a extract URL and add it to the extract table.")
 
-	parser.add_argument("-u", "--url", help="ERCOT report url to parse")
+	parser.add_argument("-u", "--url", help="ERCOT extract url to parse")
 	args = parser.parse_args()
 	print(args)
 	sUrl = args.url
 	print("sUrl=" + sUrl)
-	info = _getReportUrlInfo.getInfo(sUrl)
+	info = _getExtractUrlInfo.getInfo(sUrl)
 	printInfo(info)
 	newInfo = askForNewInfo(info)
 	appendNewInfo(newInfo)

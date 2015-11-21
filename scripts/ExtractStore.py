@@ -58,53 +58,6 @@ def getArgs ():
 	return args
 
 
-#def reportListingExists (idExtract):
-#	listings = getReportListings(idExtract)
-#	flag = bool(listings and len(listings))
-#	return flag
-
-
-#def getLatestReportListing (idExtract):
-#	listings = getReportListings(idExtract)
-#	sortedListings = sorted(listings, reverse=True, key=reportListingKey)
-#	latestListing = sortedListings[0]
-#	return latestListing
-
-
-#def getAllReportListings ():
-#	allFiles = os.listdir(X.DOWNLOAD_FOLDER)
-#	allListings = [os.path.join(X.DOWNLOAD_FOLDER, f) for f in allFiles if f.startswith('cdr') and f.endswith('zip')]
-#	return allListings
-
-#def getReportListings (idExtract):
-#	allListings = getAllReportListings()
-#	reportListings = [f for f in allListings if str(int(f.split('.')[1])) == idExtract]
-#	return reportListings
-	
-
-#def reportListingKey (reportListingName):
-#	(pathname, filename) = os.path.split(reportListingName)
-#	parts = filename.split('.')
-#	key = parts[2] + parts[3]
-#	return key
-
-
-#def download (extractInfo):
-#	store = ExtractStore(X.LISTINGS_FOLDER)
-#	listingPath = store.download(extractInfo)
-#	print("Downloaded {} to {}".format(extractInfo.url, listingPath))
-
-#def exists (extractInfo):
-#	store = ExtractStore(X.LISTINGS_FOLDER)
-#	flag = store.hasListing(extractInfo.id)
-#	print("Listing for {} exists: {}".format(extractInfo.id, flag))
-
-#def list (extractInfo):
-#	pass
-
-#def listAll (extractInfo):
-#	pass
-
 if __name__ == '__main__':
 	store = ExtractStore(Constants.LISTINGS_FOLDER)
 	table = ExtractTable()
@@ -123,7 +76,3 @@ if __name__ == '__main__':
 		pass
 	else:
 		logging.debug("extractInfo: {}".format(extractInfo))
-#	logging.debug("idExtract={}".format(idExtract))
-#	if reportListingExists(idExtract):
-#		filename = getLatestReportListing(idExtract)
-#		with _utils.unzip(filename) as src:
