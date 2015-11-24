@@ -1,5 +1,6 @@
 import argparse
 import datetime
+import logging
 import lxml.html
 import urllib.request
 import X
@@ -60,6 +61,7 @@ class ExtractListing:
 		return extractFilenames
 
 	def load (self, pathOrUrl):
+		logging.debug("pathOrUrl=" + pathOrUrl)
 		self.html = lxml.html.parse(pathOrUrl)
 		self.extractInfo = self.__class__.parseExtractInfo(self.html)
 

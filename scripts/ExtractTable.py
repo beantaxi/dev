@@ -4,6 +4,7 @@ import lxml.html
 import os
 import os.path
 import shutil
+from signal import signal, SIGPIPE, SIG_DFL # (thank you SO)
 import tempfile
 import urllib.parse
 import _utils
@@ -323,6 +324,7 @@ def parseArgs ():
 
 
 if __name__ == "__main__":
+	signal(SIGPIPE, SIG_DFL)
 	table = ExtractTable(Constants.TABLE_PATH, Constants.BACKUP_TABLE_PATH, Constants.TEMP_TABLE_PATH)
 	args = parseArgs()
 	if args.addRow:

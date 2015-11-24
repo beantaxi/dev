@@ -138,9 +138,7 @@ class GetSchedule (Stage):
 		print()
 		_utils.printFancy("Get Schedule", background=colorama.Back.BLUE)
 		extractInfo = data['extractInfo']
-		with urllib.request.urlopen(extractInfo.url) as src:
-			html = lxml.html.parse(src)
-		listing = ExtractListing(html)
+		listing = ExtractListing(extractInfo.url)
 		extractDateTimes = listing.getDateTimes()
 		n = min(len(extractDateTimes), 10)
 		dtLast = None
@@ -246,12 +244,13 @@ if __name__ == "__main__":
 		sys.exit(0)
 
 	# Add basic extract data to table
+	table = X.createExtractTable()
 	defaultExtractInfo = _getExtractUrlInfo.parse(args.url)
 	data = {'defaultExtractInfo': defaultExtractInfo}
 	stage = GetExtractInfo()
 	stage.execute(data)
 	extractInfo = data['extractInfo']
-	ExtractTable.addExtractInfo(extractInfo)
+	table.add(extractInfo)
 	msg = "'{}' (id={}) has been added to the extract table.".format(extractInfo.name, extractInfo.id)
 	print()
 	print(colorama.Back.GREEN + msg)

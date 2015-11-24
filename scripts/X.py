@@ -8,9 +8,13 @@ from ExtractStore import ExtractStore
 from ExtractTable import ExtractTable
 
 def createExtractStore ():
-	table = ExtractTable(Constants.TABLE_PATH, Constants.BACKUP_TABLE_PATH, Constants.TEMP_TABLE_PATH)
+	table = createExtractTable()
 	store = ExtractStore(table, config.DOWNLOAD_FOLDER)
 	return store
+
+def createExtractTable ():
+	table = ExtractTable(Constants.TABLE_PATH, Constants.BACKUP_TABLE_PATH, Constants.TEMP_TABLE_PATH)
+	return table
 
 def installOpener ():
 	httpsHandler = _utils.createHttpsHandler(clientCertPath=config.clientCertPath, caCertPath=config.caCertPath)
