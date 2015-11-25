@@ -10,6 +10,42 @@ import urllib.parse
 import _utils
 import Constants
 
+class ExtractInfo:
+	def __init__ (self, id, name, url):
+		self.id = id
+		self.name = name
+		self.url = url
+
+	@classmethod
+	def fromLine (cls, line):
+		id = line[0]
+		name = line[1]
+		url = line[2]
+		info = cls(id, name, url)
+		return info
+
+	def __str__ (self):
+		fmtInfo = "{0:<10}{1}"
+		sInfo = fmtInfo.format(self.id, self.name)
+		return sInfo
+
+
+class ExtractScheduleInfo:
+	def __init__ (self, extractInfo, startTime):
+		self.extractInfo = extractInfo
+		self.startTime = startTime
+	
+	@classmethod
+	def fromLine (cls, line):
+		id = line[0]
+		name = line[1]
+		url = line[2]
+		extractInfo = ExtractInfo(id, name, url)
+		sStartTime = line[3]
+		startTime = datetime.datetime.strptime(sStartTime, "%H:%M")
+		info = cls(extractInfo, startTime)
+		return info
+
 class ExtractTable:
 	def __init__ (self, tablePath, backupPath, tempTablePath):
 		self.tablePath = tablePath
@@ -18,19 +54,19 @@ class ExtractTable:
 
 	def __getitem__ (self, i):
 		data = self.all()
-		extractInfo = data[i]
-		return extractInfo
+		scheduleInfo = data[i]
+		return scheduleInfo
 
-	def add (self, extractInfo):
+	def add (self, extractInfo, startTime):
 		csvWriter = self._openCsvWriter()
-		self._writeRow(csvWriter, extractInfo)
+		self._writeRow(csvWriter, extractInfo, startTime)
 
 	def all (self):
 		data = []
 		csvReader = self._openCsvReader()
 		for line in csvReader:
-			extractInfo = ExtractInfo.fromLine(line)
-			data.append(extractInfo)
+			scheduleInfo = ExtractScheduleInfo.fromLine(line)
+			data.append(scheduleInfo)
 		return data
 
 	def backup (self):
@@ -53,30 +89,30 @@ class ExtractTable:
 		flag = os.path.exists(self.backupPath)
 		return flag
 
-	def getExtractInfo (self, arg):
+	def getScheduleInfo (self, arg):
 		if arg.isdigit():
 			n = arg
 			if int(n)<10000:
 				index = int(n)
-				info = self.getExtractInfoByIndex(index)
+				info = self.getScheduleInfoByIndex(index)
 			else:
 				id = n
-				info = self.getExtractInfoById(id)
+				info = self.getScheduleInfoById(id)
 		else:
 			name = arg
-			info = self.getExtractInfoByName(name)
+			info = self.getScheduleInfoByName(name)
 		if not info:
-			raise Exception("Extract info for {} not found in table".format(str(arg)))
+			raise Exception("Schedule info for {} not found in table".format(str(arg)))
 		return info
 
 
-	def getExtractInfoByIndex (self, index):
+	def getScheduleInfoByIndex (self, index):
 		data = self.all()
 		info = data[index]
 		return info 
 
 
-	def getExtractInfoById (self, id):
+	def getScheduleInfoById (self, id):
 		info = None
 		data = self.all()
 		for currInfo in data:
@@ -85,7 +121,7 @@ class ExtractTable:
 				break
 		return info
 
-	def getExtractInfoByName (self, name):
+	def getScheduleInfoByName (self, name):
 		info = None
 		data = self.all()
 		for currInfo in data:
@@ -113,47 +149,29 @@ class ExtractTable:
 
 	def _readRow (self, csvReader):
 		line = csvReader.read()
-		extractInfo = ExtractInfo.fromLine(line)
-		return extractInfo
+		scheduleInfo = ExtractScheduleInfo.fromLine(line)
+		return scheduleInfo
 
 	def _switchToTempTable (self):
 		self._backupTable()
 		# Rename temp file to current file
 		os.rename(self.tempTablePath, self.tablePath)
 
-	def _writeRow (self, csvWriter, extractInfo):
-		csvWriter.writerow([extractInfo.id, extractInfo.name, extractInfo.url])
+	def _writeRow (self, csvWriter, extractInfo, startTime):
+		sStartTime = startTime.strftime('%H%M')
+		csvWriter.writerow([extractInfo.id, extractInfo.name, extractInfo.url, sStartTime])
 
-	def _writeRowToTempTable (self, extractInfo):
+	def _writeRowToTempTable (self, extractInfoi, startTime):
+		sStartTime = startTime.strftime('%H%M')
 		csvWriter = self._openCsvWriter(self.tempTablePath)
-		self._writeRow(csvWriter, extractInfo)
+		self._writeRow(csvWriter, extractInfo, sStartTime)
 
 		
 
-class ExtractInfo:
-	
-	def __init__ (self, id, name, url):
-		self.id = id
-		self.name = name
-		self.url = url
-
-	@classmethod
-	def fromLine (cls, line):
-		id = line[0]
-		name = line[1]
-		url = line[2]
-		info = cls(id, name, url)
-		return info
-
-	def __str__ (self):
-		fmtInfo = "{0:<10}{1}"
-		sInfo = fmtInfo.format(self.id, self.name)
-		return sInfo
-
-
-def addRow (table, id, name, url):
+def addRow (table, id, name, url, startTime):
 	extractInfo = ExtractInfo(id, name, url)
-	table.add(extractInfo)
+	scheduleInfo = ScheduleInfo(extractInfo, startTime)
+	table.add(scheduleInfo)
 
 
 def backup (table):
@@ -176,6 +194,14 @@ def delete (table, iDelete):
 		print()
 		print("Error deleting extract '{}' (extract might not exist)".format(iDelete))
 	print()
+
+def generateCron (table):
+	data = table.all()
+
+
+	data = table.all()
+
+	data = table.all()
 
 
 # def downloadExtractList (table, arg):
@@ -247,9 +273,10 @@ def list (table):
 	print()
 	data = table.all()
 	for i in range(0, len(data)):
-		extractInfo = data[i]
-		sInfo = str(extractInfo)
-		sRow = "{0:<3}{1}".format(i, sInfo)
+		scheduleInfo = data[i]
+		sExtractInfo = str(scheduleInfo.extractInfo)
+		sStartTime = scheduleInfo.strftime("%H:%M")
+		sRow = "{0:<3}{1}".format(i, sExtractInfo, sStartTime)
 		print(sRow)
 	print()
 
@@ -257,34 +284,18 @@ def listDetails (table):
 	print()
 	data = table.all()
 	i = 0
-	for extractInfo in data:
-		sRow = "{0:<3}{1}".format(i, extractInfo)
+	for scheduleInfo in data:
+		sExtractInfo = str(scheduleInfo.extractInfo)
+		sStartTime = scheduleInfo.strftime("%H:%M")
+		sRow = "{0:<3}{1}".format(i, sExtractInfo, sStartTime)
 		print(sRow)
-		print(extractInfo.url)
+		print(scheduleInfo.extractInfo.url)
 		i += 1
 	print()
 	
 
 def manage ():
 	pass
-
-
-def printRow (i, highlight=None):
-	rows = readTable()
-	row = rows[i]
-	info = rowToInfo(row)
-	sInfo = infoToString(info)
-	sRow = "{0:<3}{1}".format(i, sInfo)
-	_utils.printFancy(sRow, highlight)
-
-
-def readTable ():
-	rows = []
-	with open(Constants.TABLE_PATH) as extractTable:
-		csvReader = csv.reader(extractTable)
-		for row in csvReader:
-			rows.append(row)
-	return rows
 
 
 def recover (table):
@@ -311,7 +322,8 @@ def parseArgs ():
 	argParser = argparse.ArgumentParser()
 	argParser.add_argument("--add-row", nargs=3, dest='addRow')
 	argParser.add_argument("--backup", action='store_true')
-	argParser.add_argument("--delete", nargs=1)
+	argParser.add_argument("-cron", "--generate-cron", action=store_true, dest='generateCron')
+	argParser.add_argument("-d", "--delete", nargs=1)
 	argParser.add_argument("--download-extract-list", nargs=1, dest='downloadExtractList')
 	argParser.add_argument("--get-url", nargs=1, dest='getUrl')
 	argParser.add_argument("--list", action="store_true")
@@ -337,6 +349,8 @@ if __name__ == "__main__":
 	elif args.delete:
 		iDelete = int(args.delete[0])
 		delete(table, iDelete)
+	elif args.generateCron:
+		generateCron(table)
 	elif args.getUrl:
 		arg = args.getUrl[0]
 		getUrl(table, arg)

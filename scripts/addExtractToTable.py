@@ -25,17 +25,29 @@ import datetime
 import distutils.util
 import lxml.html
 import logging
+import os
 import time
 import urllib.parse
 import urllib.request
 import ExtractTable
-import _getExtractUrlInfo
+import api
 import _utils
 from FutureTechEx import FutureTechEx
 from IntervalCalculator import IntervalCalculator
 from IntervalCalculator import IntervalEnum
 from TimeDelta2 import TimeDelta2
 from ExtractListing import ExtractListing
+
+
+class UserSession ():
+	def __init__ (self, stages):
+		self.stages = stages
+
+	def execute ():
+		data = {}
+		for stage in stages:
+			stage.execute(data)
+		return data
 
 class Stage (abc.ABC):
 	@abc.abstractmethod
@@ -140,7 +152,7 @@ class GetSchedule (Stage):
 		extractInfo = data['extractInfo']
 		listing = ExtractListing(extractInfo.url)
 		extractDateTimes = listing.getDateTimes()
-		n = min(len(extractDateTimes), 10)
+		n = min(len(extractDateTimes), 20)
 		dtLast = None
 		deltas = []
 		for i in range(0, n):
@@ -213,54 +225,54 @@ def askForExtractInfo (extractInfo):
 	return extractInfo
 
 
-def addCronEntry (startTime, interval):
-	extractId = extractInfo.id
-	cmd = "{} {} {}".format(config.pythonPath, config.scriptPath, extractId)
-	if interval == IntervalEnum.DAILY:
-		cron = _utils.createDailyCron(startTime)
+def getUrl (args):
+	if args.url:
+		url = args.url
+	elif 'url' in os.environ.keys():
+		url = os.environ['url']
 	else:
-		cron = _utils.createFiveMinuteCron(startTime)
-	logging.debug("cron=" + cron)
-	_utils.printFancy("Appending this line to cron file", background=colorama.Back.GREEN)
-	print()
-	print(cron + ' ' + cmd)
-	crontab = CronTab(user=True)
-	job = crontab.new(command=cmd)
-	job.setall(cron)
-	job.enable()
-	crontab.write()
-	
+		url = _utils.ask("url: ")
+	return url
 
-if __name__ == "__main__":
-	parser = argparse.ArgumentParser(description="Parse a extract URL and add it to the extract table.")
-
-	parser.add_argument("url", help="ERCOT extract url to parse")
-	args = parser.parse_args()
-	url = args.url
-	logging.debug("url=" + url)
-	
-	if not vars(args) or len(args.url) == 0:
-		parser.print_help()
-		sys.exit(0)
-
+def getExtractInfoFromUser (data):
 	# Add basic extract data to table
-	table = X.createExtractTable()
-	defaultExtractInfo = _getExtractUrlInfo.parse(args.url)
-	data = {'defaultExtractInfo': defaultExtractInfo}
 	stage = GetExtractInfo()
 	stage.execute(data)
 	extractInfo = data['extractInfo']
-	table.add(extractInfo)
 	msg = "'{}' (id={}) has been added to the extract table.".format(extractInfo.name, extractInfo.id)
 	print()
 	print(colorama.Back.GREEN + msg)
 
+def getScheduleFromUser (data):
 	# Try and figure out schedule
 	stage = GetSchedule()
 	stage.execute(data)
-	interval = data['interval']
+
+if __name__ == "__main__":
+	parser = argparse.ArgumentParser(description="Parse a extract URL and add it to the extract table.")
+	parser.add_argument("-u", "--url", help="ERCOT extract url to parse", required=False)
+	args = parser.parse_args()
+	
+	url = getUrl(args)
+	logging.debug("url=" + url)
+
+	# Initialize shared data object
+	data = {}
+
+# Create an extract info from the url
+	defaultExtractInfo = api.parseExtractListingUrl(url)
+	data['defaultExtractInfo'] = defaultExtractInfo
+
+	# Have the user confirm/change info, and save it to the table
+	getExtractInfoFromUser(data)
+
+	# Now infer the schedule from the user and allow them to refine it
+	getScheduleFromUser(data)
+
+	table = X.createExtractTable()
+	extractInfo = data['extractInfo']
 	startTime = data['startTime']
-	addCronEntry(startTime, interval)
+	table.add(extractInfo, startTime)
 
 # Prompt if they are ok
 

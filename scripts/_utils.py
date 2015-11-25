@@ -19,6 +19,23 @@ def adjust (dt, weeks=0, days=0, hours=0, minutes=0, seconds=0, milliseconds=0, 
 	return dtNew
 
 
+def ask (prompt, default=None):
+	if default:	
+		sDefault = str(default)
+		prompt = "{} [{}]".format(prompt, sDefault)
+	if not prompt.endswith(' '):
+		prompt = prompt + ' '
+	done = False
+	while not done:
+		s = input(prompt)
+		if s:
+			done = True
+		elif default:
+			s = default
+			done = True
+	return s
+
+
 def askDatetime (prompt, fmt):
 	done = False
 	while not done:
