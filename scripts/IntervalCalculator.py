@@ -3,17 +3,34 @@ from enum import Enum
 import logging
 import statistics
 import time
-import X
 
 class IntervalEnum(Enum):
 	DAILY = 86400
 	HOURLY = 3600
 	FIVE_MINUTES = 300
+	FIFTEEN_MINUTES = 900
+
+	@classmethod
+	def fromstring (cls, s):
+		return cls._member_map_[s]
+
+	def tostring (self):
+		for k,v in self.__class__._member_map_.items():
+			if v == self:
+				return k
 
 class IntervalCalculator:
-	@staticmethod
-	def getInterval (deltas):
-		intervalMap = {IntervalEnum.DAILY: 0, IntervalEnum.HOURLY: 0, IntervalEnum.FIVE_MINUTES: 0}
+	@classmethod
+	def createClearIntervalMap (cls):
+		intervalMap = {}
+		for k in IntervalEnum:
+			intervalMap[k] = 0
+		return intervalMap
+		
+
+	@classmethod
+	def getInterval (cls, deltas):
+		intervalMap = cls.createClearIntervalMap()
 		keys = intervalMap.keys()
 		for delta in [delta.total_seconds() for delta in deltas]:
 			for key in keys:

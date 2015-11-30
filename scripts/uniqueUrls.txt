@@ -1,0 +1,7 @@
+http://mis.ercot.com/misapp/GetReports.do?reportTypeId=12300&reportTitle=LMPs%20by%20Resource%20Nodes,%20Load%20Zones%20and%20Trading%20Hubs&showHTMLView=&mimicKey
+http://mis.ercot.com/misapp/GetReports.do?reportTypeId=12301&reportTitle=Settlement%20Point%20Prices%20at%20Resource%20Nodes,%20Hubs%20and%20Load%20Zones&showHTMLView=&mimicKey
+http://mis.ercot.com/misapp/GetReports.do?reportTypeId=12328&reportTitle=DAM+Hourly+LMPs
+http://mis.ercot.com/misapp/GetReports.do?reportTypeId=12331&reportTitle=DAM%20Settlement%20Point%20Prices&showHTMLView=&mimicKey
+http://mis.ercot.com/misapp/GetReports.do?reportTypeId=12332&reportTitle=DAM%20Shadow%20Prices&showHTMLView=&mimicKey
+https://mis.ercot.com/misapp/GetReports.do?reportTypeId=11485&noOfDaysofArchive=3&reportTitle=LMPs%20by%20Electrical%20Bus&showHTMLView=undefined&mimicKey=
+https://mis.ercot.com/misapp/GetReports.do?reportTypeId=12316&noOfDaysofArchive=3&reportTitle=DAM%20Ancillary%20Service%20Plan&showHTMLView=undefined&mimicKey=

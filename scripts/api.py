@@ -1,5 +1,5 @@
 import urllib.parse
-from ExtractTable import ExtractInfo
+from ExtractTable import ExtractScheduleInfo
 
 def addCronEntry (extractInfo, startTime, interval):
 	extractId = extractInfo.id
@@ -25,8 +25,7 @@ def parseExtractListingUrl (url):
 	q = urllib.parse.parse_qs(parts.query)
 	id = q['reportTypeId'][0]
 	name = q['reportTitle'][0]
-	extractInfo = ExtractInfo(id, name, url)
-	return extractInfo
+	return (id, name)
 
 def validateExtractListingUrl (url):
 	parts = urllib.parse.urlparse(url)

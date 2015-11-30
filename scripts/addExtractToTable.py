@@ -32,11 +32,12 @@ import urllib.request
 import ExtractTable
 import api
 import _utils
+from ExtractListing import ExtractListing
+from ExtractTable import ExtractScheduleInfo
 from FutureTechEx import FutureTechEx
 from IntervalCalculator import IntervalCalculator
 from IntervalCalculator import IntervalEnum
 from TimeDelta2 import TimeDelta2
-from ExtractListing import ExtractListing
 
 
 class UserSession ():
@@ -57,12 +58,13 @@ class Stage (abc.ABC):
 
 class GetExtractInfo (Stage):
 	def execute (self, data):
-		extractInfo = data['defaultExtractInfo']
+		url = data['url']
+		(reportId, reportName) = api.parseExtractListingUrl(url)
 		done = False
 		while not done:
 			print()
 			print(colorama.Back.BLUE + 'Extract Info' + colorama.Fore.RESET + colorama.Back.RESET + colorama.Style.RESET_ALL)
-			printExtractInfo(extractInfo)
+			printInfo(reportId, reportName)
 			prompt = "Are these values OK?"
 			isOk = _utils.askYesNoChoice(prompt, 'Y')
 			if isOk:
@@ -70,18 +72,11 @@ class GetExtractInfo (Stage):
 			else:
 				print("No problem - let's make some changes")
 				fmtPrompt = "{} [{}]: "
-				prompt = fmtPrompt.format("New id", extractInfo.id)
-				newId = input(prompt)
-				if newId == "":
-					newId = extractInfo.id
-				prompt = fmtPrompt.format("New name", extractInfo.name)
-				newName = input(prompt)
-				if newName == "":
-					newName = extractInfo.name
-				print("Your new id is {} and your new name is '{}'".format(newId, newName))
-				extractInfo.id = newId
-				extractInfo.name = newName
-		data['extractInfo'] = extractInfo
+				reportId = _utils.ask("New id:", reportId)
+				reportName = _utils.ask("New name:", reportName)
+				print("Your new id is {} and your new name is '{}'".format(reportId, reportName))
+		data['reportId'] = reportId
+		data['reportName'] = reportName
 		return data
 
 
@@ -91,30 +86,69 @@ class GetSchedule (Stage):
 		prompt = "Choose Daily, Hourly, or Five Minute interval (D, H, 5): "
 		interval = input(prompt)	
 
+	@staticmethod
+	def _getStartTime_Daily (datetimes):
+		times = [dt.time() for dt in datetimes]
+		(tMin, tMax, tAvg) = _utils.timeMinMaxAvg(times)
+		rounding = datetime.timedelta(minutes=5)
+		roundedMin = _utils.floorTime(tMin, rounding)
+		roundedMax = _utils.ceilTime(tMax, rounding)
+		roundedAvg = _utils.roundTime(tAvg, rounding)
+		printTimeLine("Min", tMin, roundedMin)
+		printTimeLine("Max", tMax, roundedMax)
+		printTimeLine("Avg", tAvg, roundedAvg)
+		print()
+		promptFmt = "Would you like to choose the rounded Mi{0}n{1}, Ma{0}x{1}, {0}A{1}vg, or {0}O{1}ther?"
+		prompt = promptFmt.format(colorama.Fore.BLUE + colorama.Style.BRIGHT, colorama.Style.RESET_ALL)
+		choices = "nxao"
+		choiceMap = {'n': roundedMin, 'x': roundedMax, 'a': roundedAvg}
+		choice = _utils.askMultiChoice(prompt, choices)
+		logging.debug("choice=" + choice)
+		if choice in choiceMap:
+			startTime = choiceMap[choice]
+		else:
+			startTime = _utils.askTime("What time would you like? [HH:MM] ", "%H:%M")
+		return startTime
+		
+
+	@classmethod
+	def _roundMinMaxAvg (cls, tMin, tMax, tAvg, minutes=0, seconds=0):
+		rounding = datetime.timedelta(minutes=minutes, seconds=seconds)
+		roundedMin = _utils.floorTime(tMin, rounding)
+		roundedMax = _utils.ceilTime(tMax, rounding)
+		roundedAvg = _utils.roundTime(tAvg, rounding)
+		return (roundedMin, roundedMax, roundedAvg)
+
+
+	@classmethod
+	def _getStartTime_FifteenMinutes (cls, datetimes):
+		times = [dt.time() for dt in datetimes]
+		(tMin, tMax, tAvg) = _utils.timeMinMaxAvg(times)
+		(roundedMin, roundedMax, roundedAvg) = cls._roundMinMaxAvg(tMin, tMax, tAvg, seconds=5)
+		printTimeLine("Min", tMin, roundedMin)
+		printTimeLine("Max", tMax, roundedMax)
+		printTimeLine("Avg", tAvg, roundedAvg)
+		print()
+		promptFmt = "Would you like to choose the rounded Mi{0}n{1}, Ma{0}x{1}, {0}A{1}vg, or {0}O{1}ther?"
+		prompt = promptFmt.format(colorama.Fore.BLUE + colorama.Style.BRIGHT, colorama.Style.RESET_ALL)
+		choices = "nxao"
+		choiceMap = {'n': roundedMin, 'x': roundedMax, 'a': roundedAvg}
+		choice = _utils.askMultiChoice(prompt, choices)
+		logging.debug("choice=" + choice)
+		if choice in choiceMap:
+			startTime = choiceMap[choice]
+		else:
+			startTime = _utils.askTime("What time would you like? [MM:SS] ", "%M:%S")
+		return startTime
+		
+
 	@classmethod
 	def getStartTime (cls, datetimes, interval):
 		print("It looks like the extract has the following times")
 		if interval == IntervalEnum.DAILY:
-			times = [dt.time() for dt in datetimes]
-			(tMin, tMax, tAvg) = _utils.timeMinMaxAvg(times)
-			rounding = datetime.timedelta(minutes=5)
-			roundedMin = _utils.floorTime(tMin, rounding)
-			roundedMax = _utils.ceilTime(tMax, rounding)
-			roundedAvg = _utils.roundTime(tAvg, rounding)
-			printTimeLine("Min", tMin, roundedMin)
-			printTimeLine("Max", tMax, roundedMax)
-			printTimeLine("Avg", tAvg, roundedAvg)
-			print()
-			promptFmt = "Would you like to choose the rounded Mi{0}n{1}, Ma{0}x{1}, {0}A{1}vg, or {0}O{1}ther?"
-			prompt = promptFmt.format(colorama.Fore.BLUE + colorama.Style.BRIGHT, colorama.Style.RESET_ALL)
-			choices = "nxao"
-			choiceMap = {'n': roundedMin, 'x': roundedMax, 'a': roundedAvg}
-			choice = _utils.askMultiChoice(prompt, choices)
-			logging.debug("choice=" + choice)
-			if choice in choiceMap:
-				startTime = choiceMap[choice]
-			else:
-				startTime = _utils.askTime("What time would you like? [HH:MM] ", "%H:%M")
+			startTime = _getStartTime_Daily(datetimes)
+		elif interval == IntervalEnum.FIFTEEN_MINUTES:
+			startTime = cls._getStartTime_FifteenMinutes(datetimes)
 		elif interval == IntervalEnum.FIVE_MINUTES:
 			times = [_utils.modTo5Minutes(dt) for dt in datetimes]
 			(tMin, tMax, tAvg) = _utils.timeMinMaxAvg(times)
@@ -149,8 +183,8 @@ class GetSchedule (Stage):
 	def execute (self, data):
 		print()
 		_utils.printFancy("Get Schedule", background=colorama.Back.BLUE)
-		extractInfo = data['extractInfo']
-		listing = ExtractListing(extractInfo.url)
+		url = data['url']
+		listing = ExtractListing(url)
 		extractDateTimes = listing.getDateTimes()
 		n = min(len(extractDateTimes), 20)
 		dtLast = None
@@ -177,7 +211,7 @@ class GetSchedule (Stage):
 			_utils.printFancy("Saving the interval as {}".format(interval), background=colorama.Back.GREEN)
 			print()
 		else:
-			interval = askForInterval()
+			interval = self.__class__.askForInterval()
 		data['interval'] = interval
 
 		startTime = self.__class__.getStartTime(extractDateTimes, interval)
@@ -191,10 +225,10 @@ def printTimeLine (label, t, roundedTime):
 	line = "{:5}{:18}{:18}".format(label, sTime, sRoundedTime)
 	print(line)
 	
-def printExtractInfo (extractInfo):
+def printInfo (reportId, reportName):
 	fmt = "{:<6} {}"
-	print(fmt.format("id", extractInfo.id))
-	print(fmt.format("name", extractInfo.name))
+	print(fmt.format("id", reportId))
+	print(fmt.format("name", reportName))
 	print()
 	
 
@@ -238,8 +272,9 @@ def getExtractInfoFromUser (data):
 	# Add basic extract data to table
 	stage = GetExtractInfo()
 	stage.execute(data)
-	extractInfo = data['extractInfo']
-	msg = "'{}' (id={}) has been added to the extract table.".format(extractInfo.name, extractInfo.id)
+	reportId = data['reportId']
+	reportName = data['reportName']
+	msg = "'{}' (id={}) has been added to the extract table.".format(reportName, reportId)
 	print()
 	print(colorama.Back.GREEN + msg)
 
@@ -258,21 +293,21 @@ if __name__ == "__main__":
 
 	# Initialize shared data object
 	data = {}
-
-# Create an extract info from the url
-	defaultExtractInfo = api.parseExtractListingUrl(url)
-	data['defaultExtractInfo'] = defaultExtractInfo
+	data['url'] = url
 
 	# Have the user confirm/change info, and save it to the table
 	getExtractInfoFromUser(data)
 
 	# Now infer the schedule from the user and allow them to refine it
 	getScheduleFromUser(data)
-
-	table = X.createExtractTable()
-	extractInfo = data['extractInfo']
+	reportId = data['reportId']
+	reportName = data['reportName']
+	url = data['url']
+	interval = data['interval']
 	startTime = data['startTime']
-	table.add(extractInfo, startTime)
+	info = ExtractScheduleInfo(reportId, reportName, url, interval, startTime)
+	table = X.createExtractTable()
+	table.add(info)
 
 # Prompt if they are ok
 

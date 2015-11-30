@@ -34,9 +34,9 @@ class ExtractStore:
 		return path
 
 	def downloadListing (self, extractId):
-		extractInfo = 	self.extractTable.getExtractInfo(extractId)
-		url = extractInfo.url
-		filename = extractInfo.id + '.html'
+		info = 	self.extractTable.getInfo(extractId)
+		url = info.url
+		filename = info.reportId + '.html'
 		folder = os.path.join(self.homeFolder, 'listings')
 		listingPath = _utils.download(url, folder=folder, filename=filename)
 		listing = ExtractListing(listingPath)
