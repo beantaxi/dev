@@ -1,6 +1,7 @@
 import colorama
-import datetime
-
+from datetime import datetime
+from datetime import time
+from datetime import timedelta
 import distutils.util
 import http.cookiejar
 import logging
@@ -8,14 +9,23 @@ import os.path
 import shutil
 import ssl
 import sys
-import time
 import urllib.request
 import zipfile
+
+class ExtractFilename:
+	def __init__ (self, filename):
+		self.filename = filename
+		(reportId, date, time) = parseExtractFilename(self.filename)
+		self.reportId = reportId
+		self.date = date
+		self.time = time
+
+
 
 def adjust (dt, weeks=0, days=0, hours=0, minutes=0, seconds=0, milliseconds=0, microseconds=0):
 	localVars = dict(locals())
 	del localVars['dt']
-	td = datetime.timedelta(**localVars)
+	td = timedelta(**localVars)
 	dtNew = dt + td
 	return dtNew
 
@@ -42,10 +52,10 @@ def askDatetime (prompt, fmt):
 	while not done:
 		try:
 			sDatetime = input(prompt)
-			dt = datetime.datetime.strptime(sDatetime, fmt)
+			dt = datetime.strptime(sDatetime, fmt)
 			done = True
 		except ValueError:
-			print(colorama.Fore.RED + "Please enter a valid date/time in the proper format")
+			print(colorama.Fore.RED + "Please enter a valid date/time in the proper format" + colorama.Style.RESET_ALL)
 	return dt
 
 
@@ -54,10 +64,10 @@ def askTime (prompt, fmt="%H:%M:%S"):
 	while not done:
 		try:
 			sTime = input(prompt)
-			t = datetime.datetime.strptime(sTime, fmt).time()
+			t = datetime.strptime(sTime, fmt).time()
 			done = True
 		except ValueError:
-			print(colorama.Fore.RED + "Please enter a valid time in the proper format")
+			print(colorama.Fore.RED + "Please enter a valid time in the proper format" + colorama.Style.RESET_ALL)
 	return t
 
 
@@ -117,16 +127,22 @@ def createCookieProcessor (cookieJar=None):
 	cookieProcessor = urllib.request.HTTPCookieProcessor(cookieJar)
 	return cookieProcessor
 
-def createDailyCron (t):
-	h = t.hour
-	m = t.minute
+def createDailyCron (tStart):
+	h = tStart.hour
+	m = tStart.minute
 	fmt = "{} {} * * *"
 	cron = fmt.format(m, h)
 	return cron
 
-def createFiveMinuteCron (t):
-	seq = range(0,12)  
-	minutes = [str(t.minute + 5*m) for m in seq]
+def createHourlyCron (tStart):
+	m = tStart.minute
+	fmt = "{} * * * *"
+	cron = fmt.format(m)
+	return cron
+
+def createMinuteCron (tStart, mInterval):
+	seq = range(0, 60//mInterval)  
+	minutes = [str(tStart.minute + m*mInterval) for m in seq]
 	sMinutes = ','.join(minutes)
 	fmt = "{} * * * *"
 	cron = fmt.format(sMinutes)
@@ -147,13 +163,13 @@ def getCertPath (certName):
 	return certPath
 	
 
-def roundTime (t, delta=datetime.timedelta(minutes=1)):
+def roundTime (t, delta=timedelta(minutes=1)):
 	seconds = t.hour*3600 + t.minute*60 + t.second
 	deltaSeconds = delta.seconds
 	roundedSeconds = (seconds + deltaSeconds//2) // deltaSeconds * deltaSeconds
 	h, extra = divmod(roundedSeconds, 3600)
 	m, s = divmod(extra, 60)
-	roundedTime = datetime.time(h, m, s)
+	roundedTime = time(h, m, s)
 	return roundedTime
 
 def timeMinMaxAvg (times):
@@ -169,7 +185,7 @@ def timeMinMaxAvg (times):
 	h, leftover = divmod(avgSeconds, 3600)
 	m, s = divmod(leftover, 60)
 	logging.debug("h={} m={} s={}".format(str(h), str(m), str(s)))
-	avg = datetime.time(h, m, s)
+	avg = time(h, m, s)
 	return (min, max, avg)
 
 
@@ -186,7 +202,7 @@ def ceilTime (t, delta):
 	roundedSeconds = (seconds + delta.seconds) // delta.seconds * delta.seconds
 	(h, m, s) = calcHms(roundedSeconds)
 	logging.debug("h={} m={} s={}".format(int(h), int(m), int(s)))
-	roundedTime = datetime.time(h, m, s)
+	roundedTime = time(h, m, s)
 	return roundedTime
 	
 
@@ -203,7 +219,7 @@ def floorTime (t, delta):
 	roundedSeconds = seconds // delta.seconds * delta.seconds
 	(h, m, s) = calcHms(roundedSeconds)
 	logging.debug("h={} m={} s={}".format(int(h), int(m), int(s)))
-	roundedTime = datetime.time(h, m, s)
+	roundedTime = time(h, m, s)
 	return roundedTime
 	
 
@@ -221,13 +237,45 @@ def getDeltas (dateTimes, descending=False):
 	return deltas
 
 
+def modTo15Minutes (dt):
+	tOrig = dt.time();
+	h = 0
+	m = tOrig.minute % 15
+	s = tOrig.second
+	t = time(h, m, s)
+	return t
+
+
 def modTo5Minutes (dt):
 	tOrig = dt.time();
 	h = 0
 	m = tOrig.minute % 5
 	s = tOrig.second
-	t = datetime.time(h, m, s)
+	t = time(h, m, s)
 	return t
+
+def modToHourly(dt):
+	tOrig = dt.time();
+	h = 0
+	m = tOrig.minute
+	s = tOrig.second
+	t = time(h, m, s)
+	return t
+
+
+# Sample filename:
+# :
+# cdr.00012300.0000000000000000.20151207.181016405.LMPSROSNODENP6788_20151207_181011_csv.zip
+
+def parseExtractFilename (filename):
+	parts = filename.split('.')
+	reportId = parts[1].lstrip('0')
+	sDate = parts[3]
+	date = datetime.strptime(sDate, '%Y%m%d')
+	sTime = parts[4]
+	time = datetime.strptime(sTime, '%H%M%S')
+	tuple = (reportId, date, time)
+	return tuple
 
 def printAlternating (lines, style1, style2):
 	for i in range(0, len(lines)):
@@ -257,6 +305,7 @@ def unzip (sZipfile, folder=None):
 		if len(infolist) != 1:
 			raise Exception("{} contains more than one entry.".format(sZipfile))
 		zi = infolist[0]
+		logging.debug("Unzipping to " + folder)
 		data = zip.extract(zi, path=folder)
 		path = os.path.join(folder, zi.filename)
 	return path

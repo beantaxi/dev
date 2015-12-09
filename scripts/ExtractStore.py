@@ -1,6 +1,8 @@
 import argparse
 import logging
+import os
 import os.path
+import config
 import Constants
 from ExtractTable import ExtractTable
 from ExtractListing import ExtractListing
@@ -10,6 +12,13 @@ class ExtractStore:
 	def __init__ (self, extractTable, homeFolder):
 		self.extractTable = extractTable
 		self.homeFolder = homeFolder
+
+	@classmethod
+	def createDownloadFolderName (cls, folder, filename):
+		ef = _utils.ExtractFilename(filename)
+		sDate = ef.date.strftime('%Y%m%d')
+		folderName = os.path.join(folder, sDate)
+		return folderName
 
 	@staticmethod
 	def getExtractId (filename):
@@ -24,20 +33,33 @@ class ExtractStore:
 		flag = filename.startswith('cdr') and filename.endswith('zip')
 		return flag
 	
+	def createDownloadFolder (self, filename):
+		folderName = self.__class__.createDownloadFolderName(self.homeFolder, filename)
+		os.makedirs(folderName, exist_ok=True)
+		return folderName
+
+	def downloadAllListings (self, extractId):
+		info = self.extractTable.getInfoById(extractId)
+		# download listing
+		# iterate through listing
+		# download everything
+	
 	def downloadLatestExtract (self, extractId):
 		listing = self.downloadListing(extractId)
 		latestExtractInfo = listing.extractInfo[next(iter(listing.extractInfo))]
 		url = latestExtractInfo['url']
 		filename = latestExtractInfo['filename']
-		path = _utils.download(url, self.homeFolder, filename)
-		_utils.unzip(path, self.homeFolder)
+		folderName = self.createDownloadFolder(filename)
+		path = _utils.download(url, folderName, filename)
+		_utils.unzip(path, folderName)
 		return path
 
 	def downloadListing (self, extractId):
-		info = 	self.extractTable.getInfo(extractId)
+		info = self.extractTable.getInfo(extractId)
 		url = info.url
 		filename = info.reportId + '.html'
 		folder = os.path.join(self.homeFolder, 'listings')
+		os.makedirs(folder, exist_ok=True)
 		listingPath = _utils.download(url, folder=folder, filename=filename)
 		listing = ExtractListing(listingPath)
 		return listing
@@ -67,6 +89,7 @@ class ExtractStore:
 def getArgs ():
 	ap = argparse.ArgumentParser()
 	ap.add_argument('arg')
+	ap.add_argument('-da', '--downloadAll', dest='downloadAllExtracts', action='store_true')
 	ap.add_argument('-de', '--downloadExtract', action='store_true')
 	ap.add_argument('-dl', '--downloadListing', action='store_true')
 	ap.add_argument('--exists', action='store_true')
@@ -77,11 +100,13 @@ def getArgs ():
 
 if __name__ == '__main__':
 	table = ExtractTable(Constants.TABLE_PATH, Constants.BACKUP_TABLE_PATH, Constants.TEMP_TABLE_PATH)
-	store = ExtractStore(table, Constants.LISTINGS_FOLDER)
+	store = ExtractStore(table, config.DOWNLOAD_FOLDER)
 	args = getArgs()
 	arg = args.arg
 	
-	if args.downloadExtract:
+	if args.downloadAllExtracts:
+		store.downloadAllExtracts(arg)
+	elif args.downloadExtract:
 		path = store.downloadLatestExtract(arg)
 		print(path)
 	elif args.downloadListing:

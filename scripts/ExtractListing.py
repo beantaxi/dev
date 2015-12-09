@@ -3,7 +3,6 @@ import datetime
 import logging
 import lxml.html
 import urllib.request
-import X
 from collections import OrderedDict
 from IntervalCalculator import IntervalCalculator
 from TimeDelta2 import TimeDelta2
@@ -61,8 +60,12 @@ class ExtractListing:
 		return extractFilenames
 
 	def load (self, pathOrUrl):
-		logging.debug("pathOrUrl=" + pathOrUrl)
-		self.html = lxml.html.parse(pathOrUrl)
+		parts = urllib.parse.urlparse(pathOrUrl)
+		if not parts.scheme:
+			self.html = lxml.html.parse(pathOrUrl)
+		else:
+			with urllib.request.urlopen(pathOrUrl) as src:
+				self.html = lxml.html.parse(src)
 		self.extractInfo = self.__class__.parseExtractInfo(self.html)
 
 if __name__ == '__main__':

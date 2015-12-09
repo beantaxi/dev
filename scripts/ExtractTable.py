@@ -8,6 +8,7 @@ import shutil
 from signal import signal, SIGPIPE, SIG_DFL # (thank you SO)
 import tempfile
 import urllib.parse
+import api
 import _utils
 import Constants
 from IntervalCalculator import IntervalEnum
@@ -70,10 +71,13 @@ class ExtractTable:
 		self.backupPath = backupPath
 		self.tempTablePath = tempTablePath
 
-	def __getitem__ (self, i):
+	def __getitem__ (self, reportId):
 		data = self.all()
-		scheduleInfo = data[i]
-		#return scheduleInfo
+		for currInfo in data:
+			if currInfo.reportId == reportId:
+				info = currInfo
+				break
+		return info
 
 	def add (self, info):
 		csvWriter = self._openCsvWriter()
@@ -90,13 +94,11 @@ class ExtractTable:
 	def backup (self):
 		shutil.copy2(self.tablePath, self.backupPath)
 
-	def delete (self, iDelete):
-		all = self.all()
-		i = 0
-		for info in all:
-			if i != iDelete:
+	def delete (self, reportId):
+		open(self.tempTablePath, "w").close()
+		for info in self.all():
+			if reportId != info.reportId:
 				self._writeRowToTempTable(info)
-			i += 1
 		self._switchToTempTable()
 
 	def _backupTable (self):
@@ -179,10 +181,9 @@ class ExtractTable:
 		row = info.toRow()
 		csvWriter.writerow(row)
 
-	def _writeRowToTempTable (self, extractInfoi, startTime):
-		sStartTime = startTime.strftime('%H%M')
+	def _writeRowToTempTable (self, info):
 		csvWriter = self._openCsvWriter(self.tempTablePath)
-		self._writeRow(csvWriter, extractInfo, sStartTime)
+		self._writeRow(csvWriter, info)
 
 		
 def addRow (table, url, interval, startTime):
@@ -196,25 +197,28 @@ def backup (table):
 	print()
 	print("Successfully backed up {} to {}".format(table.tablePath, table.backupPath))
 #
-#def delete (table, iDelete):
-#	try:
-#		extractInfo = table[iDelete]
-#		s = "{0:<4}{1}".format(iDelete, extractInfo)
-#		_utils.printFancy(s, highlight='=')
-#		flag = _utils.askYesNoChoice("Delete row?", False)
-#		if flag:
-#			table.delete(iDelete)
-#			print("Row deleted.")
-#		else:
-#			print("Delete cancelled.")
-#	except Exception:
-#		print()
-#		print("Error deleting extract '{}' (extract might not exist)".format(iDelete))
-#	print()
+def delete (table, reportId):
+	try:
+		info = table[reportId]
+		s = info.pretty()
+		_utils.printFancy(s, highlight='=')
+		flag = _utils.askYesNoChoice("Delete row?", False)
+		if flag:
+			table.delete(reportId)
+			print("Row deleted.")
+		else:
+			print("Delete cancelled.")
+	except Exception:
+		print()
+		print("Error deleting extract '{}' (extract might not exist)".format(reportId))
+	print()
+
 
 def generateCron (table):
+	api.clearCronEntries()
 	data = table.all()
-	raise FutureTechEx("Working on generating cron!")
+	for info in data:
+		api.addCronEntry(info)
 
 
 # def downloadExtractList (table, arg):
@@ -283,13 +287,11 @@ def getUrl (table, arg):
 
 
 def list (table):
-	print()
 	data = table.all()
 	for i, info in enumerate(data):
 		sInfo = info.pretty()
 		s = "{0:<3}{1}".format(i, sInfo)
 		print(s)
-	print()
 
 def listDetails (table):
 	print()
@@ -332,6 +334,7 @@ def parseArgs ():
 	argParser.add_argument("--backup", action='store_true')
 	argParser.add_argument("-cron", "--generate-cron", action="store_true", dest='generateCron')
 	argParser.add_argument("-d", "--delete", nargs=1)
+	argParser.add_argument("-dl", "--download", nargs=1)
 	argParser.add_argument("--download-extract-list", nargs=1, dest='downloadExtractList')
 	argParser.add_argument("--get-url", nargs=1, dest='getUrl')
 	argParser.add_argument("--list", action="store_true")
@@ -355,8 +358,11 @@ if __name__ == "__main__":
 	elif args.backup:
 		backup(table)
 	elif args.delete:
-		iDelete = int(args.delete[0])
-		delete(table, iDelete)
+		reportId = args.delete[0]
+		delete(table, reportId)
+	elif args.download:
+		reportId = args.download[0]
+		download(table, reportId)
 	elif args.generateCron:
 		generateCron(table)
 	elif args.getUrl:
