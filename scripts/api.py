@@ -1,11 +1,20 @@
 import colorama
 from crontab import CronTab
+from datetime import datetime
 import urllib.parse
 import config
 import logging
 import _utils
 from FutureTechEx import FutureTechEx
 from IntervalCalculator import IntervalEnum
+
+class ExtractFilename:
+	def __init__ (self, filename):
+		self.filename = filename
+		(reportId, dt) = parseExtractFilename(self.filename)
+		self.reportId = reportId
+		self.datetime = dt
+
 
 def addCronEntry (info):
 	cmd = "{} {} {}".format(config.pythonPath, config.scriptPath, info.reportId)
@@ -32,6 +41,20 @@ def clearCronEntries ():
 	crontab = CronTab(user=True)
 	crontab.remove_all(config.scriptPath)
 	crontab.write()
+
+# Sample filename:
+# :
+# cdr.00012300.0000000000000000.20151207.181016405.LMPSROSNODENP6788_20151207_181011_csv.zip
+def parseExtractFilename (filename):
+	parts = filename.split('.')
+	reportId = parts[1].lstrip('0')
+	sDate = parts[3]
+	sTime = parts[4]
+	sDateTime = sDate + sTime
+	sDateTimeFormat = '%Y%m%d%H%M%S%f'
+	dt = datetime.strptime(sDateTime, sDateTimeFormat)
+	tuple = (reportId, dt)
+	return tuple
 
 def parseExtractListingUrl (url):
 	validateExtractListingUrl(url)

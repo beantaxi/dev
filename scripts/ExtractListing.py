@@ -4,6 +4,7 @@ import logging
 import lxml.html
 import urllib.request
 from collections import OrderedDict
+from api import ExtractFilename
 from IntervalCalculator import IntervalCalculator
 from TimeDelta2 import TimeDelta2
 import _utils
@@ -30,6 +31,13 @@ class ExtractListing:
 #		Zero time out on each
 #		Compare dates
 
+	# The data we are interested in - the filename and URL of each extract - are stored in the 1st
+	# and 4th <td> of each <tr>. There does not seem to be a way, to have lxml.html return a list of rows, 
+	# where e.g. each row is a 2 element tuple. The best it can do is return a single one-dimensional list,
+	# with two elements per extract. This function iterates over that list, a data structure that looks like
+	# 	[ datetime => {filename, url}]
+	# where the list has one element per every two rows; the key is the extract's datetime; the value is a
+	# a ditcionary containing the filename and url; and all these values are parsed from the XML.
 	@classmethod
 	def parseExtractInfo (cls, html):
 		results = html.xpath(cls.XPATH)
@@ -37,9 +45,9 @@ class ExtractListing:
 		extracts = {}
 		for i in range(0, nRows):
 			filename = results[i*2].strip()
+			ef = ExtractFilename(filename)
 			url = "https://mis.ercot.com" + results[i*2+1].strip()
-			datetime = ExtractListing.getDateTime(filename)
-			extracts[datetime] = {'filename': filename, 'url': url}
+			extracts[ef.datetime] = {'filename': filename, 'url': url}
 		od = OrderedDict()
 		for key in sorted(extracts, reverse=True):
 			od[key] = extracts[key]

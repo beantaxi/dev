@@ -12,16 +12,6 @@ import sys
 import urllib.request
 import zipfile
 
-class ExtractFilename:
-	def __init__ (self, filename):
-		self.filename = filename
-		(reportId, date, time) = parseExtractFilename(self.filename)
-		self.reportId = reportId
-		self.date = date
-		self.time = time
-
-
-
 def adjust (dt, weeks=0, days=0, hours=0, minutes=0, seconds=0, milliseconds=0, microseconds=0):
 	localVars = dict(locals())
 	del localVars['dt']
@@ -262,20 +252,6 @@ def modToHourly(dt):
 	t = time(h, m, s)
 	return t
 
-
-# Sample filename:
-# :
-# cdr.00012300.0000000000000000.20151207.181016405.LMPSROSNODENP6788_20151207_181011_csv.zip
-
-def parseExtractFilename (filename):
-	parts = filename.split('.')
-	reportId = parts[1].lstrip('0')
-	sDate = parts[3]
-	date = datetime.strptime(sDate, '%Y%m%d')
-	sTime = parts[4]
-	time = datetime.strptime(sTime, '%H%M%S')
-	tuple = (reportId, date, time)
-	return tuple
 
 def printAlternating (lines, style1, style2):
 	for i in range(0, len(lines)):

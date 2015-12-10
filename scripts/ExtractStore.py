@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 import os.path
+from api import ExtractFilename
 import config
 import Constants
 from ExtractTable import ExtractTable
@@ -15,8 +16,8 @@ class ExtractStore:
 
 	@classmethod
 	def createDownloadFolderName (cls, folder, filename):
-		ef = _utils.ExtractFilename(filename)
-		sDate = ef.date.strftime('%Y%m%d')
+		ef = ExtractFilename(filename)
+		sDate = ef.datetime.strftime('%Y%m%d')
 		folderName = os.path.join(folder, sDate)
 		return folderName
 
@@ -53,6 +54,14 @@ class ExtractStore:
 		path = _utils.download(url, folderName, filename)
 		_utils.unzip(path, folderName)
 		return path
+
+	def downloadLatestExtracts (self, extractId):
+		listing = self.downloadListing(extractId)
+		for dt, info in listing.extractInfo.items():
+			sDate = dt.strftime('%Y%m%s')
+			folder = os.join(self.homeFolder, sDate)
+
+
 
 	def downloadListing (self, extractId):
 		info = self.extractTable.getInfo(extractId)
