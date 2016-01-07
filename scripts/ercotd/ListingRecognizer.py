@@ -1,5 +1,4 @@
 from enum import Enum
-import logging
 import lxml.html
 import os
 import urllib.request

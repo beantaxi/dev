@@ -3,14 +3,29 @@ from datetime import datetime
 from datetime import time
 from datetime import timedelta
 import distutils.util
-import http.cookiejar
 import logging
+import http.cookiejar
 import os.path
 import shutil
 import ssl
+import syslog
 import sys
 import urllib.request
 import zipfile
+
+class _syslog:
+	@classmethod
+	def debug (cls, msg):
+		syslog.syslog(syslog.LOG_DEBUG, msg)
+	
+	@classmethod
+	def error (cls, msg):
+		syslog.syslog(syslog.LOG_ERR, msg)
+
+	@classmethod
+	def info (cls, msg):
+		syslog.syslog(syslog.LOG_INFO, msg)
+
 
 def adjust (dt, weeks=0, days=0, hours=0, minutes=0, seconds=0, milliseconds=0, microseconds=0):
 	localVars = dict(locals())
@@ -88,7 +103,6 @@ def askMultiChoice (prompt, charChoices, default=None):
 	sChoices = ''.join(list(charChoices))
 	if default:
 		sChoices = sChoices.replace(default.lower(), default.upper())
-	logging.debug("sChoices=" + sChoices)
 	prompt = "{} [{}]: ".format(prompt, sChoices)
 	done = False
 	while not done:
@@ -174,7 +188,6 @@ def timeMinMaxAvg (times):
 	avgSeconds = totalSeconds // len(times)
 	h, leftover = divmod(avgSeconds, 3600)
 	m, s = divmod(leftover, 60)
-	logging.debug("h={} m={} s={}".format(str(h), str(m), str(s)))
 	avg = time(h, m, s)
 	return (min, max, avg)
 
@@ -188,10 +201,8 @@ def calcHms (seconds):
 
 def ceilTime (t, delta):
 	seconds = t.hour*3600 + t.minute*60 + t.second
-	logging.debug("seconds=" + str(seconds))
 	roundedSeconds = (seconds + delta.seconds) // delta.seconds * delta.seconds
 	(h, m, s) = calcHms(roundedSeconds)
-	logging.debug("h={} m={} s={}".format(int(h), int(m), int(s)))
 	roundedTime = time(h, m, s)
 	return roundedTime
 	
@@ -205,10 +216,8 @@ def download (url, folder, filename):
 
 def floorTime (t, delta):
 	seconds = t.hour*3600 + t.minute*60 + t.second
-	logging.debug("seconds=" + str(seconds))
 	roundedSeconds = seconds // delta.seconds * delta.seconds
 	(h, m, s) = calcHms(roundedSeconds)
-	logging.debug("h={} m={} s={}".format(int(h), int(m), int(s)))
 	roundedTime = time(h, m, s)
 	return roundedTime
 	
@@ -273,7 +282,7 @@ def printFancy (s, highlight=None, background=None):
 # Returns an open stream to the zipped file
 # Assumes zipfile is a simple zipped file - there should be only one entry in this zip file.
 # If not, throws an ex.
-def unzip (sZipfile, folder=None):
+def unzip1 (sZipfile, folder=None):
 	if not folder:
 		folder = os.getcwd()
 	with zipfile.ZipFile(sZipfile) as zip:
@@ -281,7 +290,6 @@ def unzip (sZipfile, folder=None):
 		if len(infolist) != 1:
 			raise Exception("{} contains more than one entry.".format(sZipfile))
 		zi = infolist[0]
-		logging.debug("Unzipping to " + folder)
 		data = zip.extract(zi, path=folder)
 		path = os.path.join(folder, zi.filename)
 	return path

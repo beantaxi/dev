@@ -1,6 +1,5 @@
 import datetime
 from enum import Enum
-import logging
 import statistics
 import time
 
@@ -54,10 +53,10 @@ class IntervalCalculator:
 		# Chuck outliers
 		# Get the average again
 		avg = statistics.mean([delta.total_seconds() for delta in deltas])
-		logging.debug("avg=" + str(avg))
+		X.debug("avg=" + str(avg))
 		for delta in deltas:
 			print("{:5}{:10}{:24}{:24}".format(str(delta.days), str(delta.seconds), str(avg), str(abs(delta.total_seconds()-avg))))
 		avg2 = statistics.mean([delta.total_seconds() for delta in deltas if abs(delta.total_seconds()-avg) < 7200])
-		logging.debug("avg2=" + str(avg2))
+		X.debug("avg2=" + str(avg2))
 		startTime = time.gmtime(avg2)
 		return startTime

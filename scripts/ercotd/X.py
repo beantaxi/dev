@@ -1,6 +1,6 @@
 import config
-import logging
 import os.path
+import syslog
 import urllib.request
 import _utils
 import Constants
@@ -16,14 +16,25 @@ def createExtractTable ():
 	table = ExtractTable(Constants.TABLE_PATH, Constants.BACKUP_TABLE_PATH, Constants.TEMP_TABLE_PATH)
 	return table
 
+def debug (msg):
+	_syslog(syslog.LOG_DEBUG, msg)
+
+def error (msg):
+	_syslog(syslog.LOG_ERR, msg)
+
 def installOpener ():
 	httpsHandler = _utils.createHttpsHandler(clientCertPath=config.clientCertPath, caCertPath=config.caCertPath)
 	cookieProcessor = _utils.createCookieProcessor()
 	opener = urllib.request.build_opener(httpsHandler, cookieProcessor)
 	urllib.request.install_opener(opener)
 
+def log (msg):
+	_syslog(syslog.LOG_INFO, msg)
+
+def _syslog (priority, msg):
+	syslog.syslog(priority, msg)
+	
+
 installOpener()
-logging.basicConfig(level=logging.DEBUG)
-
-
+syslog.openlog(Constants.APPNAME, facility=syslog.LOG_LOCAL0)
 

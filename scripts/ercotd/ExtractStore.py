@@ -1,13 +1,14 @@
 import argparse
-import logging
 import os
 import os.path
+import traceback
 from api import ExtractFilename
 import config
 import Constants
 from ExtractTable import ExtractTable
 from ExtractListing import ExtractListing
 import _utils
+import X
 
 class ExtractStore:
 	def __init__ (self, extractTable, homeFolder):
@@ -52,16 +53,30 @@ class ExtractStore:
 		filename = latestExtractInfo['filename']
 		folderName = self.createDownloadFolder(filename)
 		path = _utils.download(url, folderName, filename)
-		_utils.unzip(path, folderName)
+		_utils.unzip1(path, folderName)
 		return path
 
 	def downloadLatestExtracts (self, extractId):
 		listing = self.downloadListing(extractId)
 		for dt, info in listing.extractInfo.items():
-			sDate = dt.strftime('%Y%m%s')
-			folder = os.join(self.homeFolder, sDate)
-
-
+			filename = info['filename']
+			url = info['url']
+			sDate = dt.strftime('%Y%m%d')
+			folder = os.path.join(self.homeFolder, sDate)
+			if not os.path.islink(folder):
+				os.makedirs(folder, exist_ok=True)
+			path = os.path.join(folder, filename)
+			if not os.path.isfile(path):
+				# print("Missing {} ...".format(path))
+				X.log("Downloading {} ...".format(filename))
+				try:
+					zipPath = _utils.download(url, folder, filename)
+					X.log("Unzipping {} ...".format(zipPath))
+					path = _utils.unzip1(zipPath, folder)
+					X.log("Created {}.".format(path))
+				except Exception as ex:
+					sError = traceback.format_exc()
+					X.error(sError)
 
 	def downloadListing (self, extractId):
 		info = self.extractTable.getInfo(extractId)
@@ -108,31 +123,34 @@ def getArgs ():
 	return args
 
 if __name__ == '__main__':
-	table = ExtractTable(Constants.TABLE_PATH, Constants.BACKUP_TABLE_PATH, Constants.TEMP_TABLE_PATH)
-	store = ExtractStore(table, config.DOWNLOAD_FOLDER)
-	args = getArgs()
-	arg = args.arg
-	
-	if args.downloadAllExtracts:
-		store.downloadAllExtracts(arg)
-	elif args.downloadExtract:
-		path = store.downloadLatestExtract(arg)
-		print(path)
-	elif args.downloadListing:
-		listing = store.downloadListing(arg)
-		firstKey = next(iter(listing.extractInfo))
-		print(listing.extractInfo[firstKey])
-	elif args.exists:
-		store.exists(extractInfo)
-	elif args.list:
-		pass
-	elif args.listAll:
-		pass
-	elif args.exists:
-		store.exists(extractInfo)
-	elif args.list:
-		pass
-	elif args.listAll:
-		pass
-	else:
-		logging.debug("extractInfo: {}".format(extractInfo))
+	try:
+		table = ExtractTable(Constants.TABLE_PATH, Constants.BACKUP_TABLE_PATH, Constants.TEMP_TABLE_PATH)
+		store = ExtractStore(table, config.DOWNLOAD_FOLDER)
+		args = getArgs()
+		arg = args.arg
+		
+		if args.downloadAllExtracts:
+			store.downloadAllExtracts(arg)
+		elif args.downloadExtract:
+			path = store.downloadLatestExtract(arg)
+			print(path)
+		elif args.downloadListing:
+			listing = store.downloadListing(arg)
+			firstKey = next(iter(listing.extractInfo))
+			print(listing.extractInfo[firstKey])
+		elif args.exists:
+			store.exists(extractInfo)
+		elif args.list:
+			pass
+		elif args.listAll:
+			pass
+		elif args.exists:
+			store.exists(extractInfo)
+		elif args.list:
+			pass
+		elif args.listAll:
+			pass
+		else:
+			X.debug("extractInfo: {}".format(extractInfo))
+	except Exception as ex:
+		X.err(str(ex))

@@ -1,6 +1,5 @@
 import argparse
 import datetime
-import logging
 import lxml.html
 import urllib.request
 from collections import OrderedDict

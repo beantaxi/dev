@@ -3,7 +3,6 @@ from crontab import CronTab
 from datetime import datetime
 import urllib.parse
 import config
-import logging
 import _utils
 from FutureTechEx import FutureTechEx
 from IntervalCalculator import IntervalEnum
@@ -28,7 +27,6 @@ def addCronEntry (info):
 		cron = _utils.createHourlyCron(info.startTime)
 	else:
 		raise Exception("Unknown interval! (" + str(info.interval) + ")")
-	logging.debug("cron=" + cron)
 	_utils.printFancy("Appending this line to cron file", background=colorama.Back.GREEN)
 	print(cron + ' ' + cmd)
 	crontab = CronTab(user=True)
@@ -41,6 +39,13 @@ def clearCronEntries ():
 	crontab = CronTab(user=True)
 	crontab.remove_all(config.scriptPath)
 	crontab.write()
+
+
+def downloadAndLog (url, folder, filename):
+	path = _utils.download(url, folder, filename)
+	_utils.unzip1(path, folderName)
+	return path
+	
 
 # Sample filename:
 # :

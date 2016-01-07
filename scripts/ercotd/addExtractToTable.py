@@ -24,7 +24,6 @@ from crontab import CronTab
 import datetime
 import distutils.util
 import lxml.html
-import logging
 import os
 import time
 import urllib.parse
@@ -111,7 +110,7 @@ class GetSchedule (Stage):
 		choices = "nxao"
 		choiceMap = {'n': roundedMin, 'x': roundedMax, 'a': roundedAvg}
 		choice = _utils.askMultiChoice(prompt, choices)
-		logging.debug("choice=" + choice)
+		X.debug("choice=" + choice)
 		if choice in choiceMap:
 			startTime = choiceMap[choice]
 		else:
@@ -176,12 +175,12 @@ class GetSchedule (Stage):
 			choices = "nxao"
 			choiceMap = {'n': roundedMin, 'x': roundedMax, 'a': roundedAvg}
 			choice = _utils.askMultiChoice(prompt, choices)
-			logging.debug("choice=" + choice)
+			X.debug("choice=" + choice)
 			if choice in choiceMap:
 				startTime = choiceMap[choice]
 			else:
 				startTime = _utils.askTime("What time would you like? [MM:SS] ", "%M:%S")
-			logging.debug("startTime=" + str(startTime))
+			X.debug("startTime=" + str(startTime))
 
 			# Create a strip of the times, modding the minutes by 5
 			# Check out time min max rounding on that. Maybe the method should know how.
@@ -302,7 +301,7 @@ if __name__ == "__main__":
 	args = parser.parse_args()
 	
 	url = getUrl(args)
-	logging.debug("url=" + url)
+	X.debug("url=" + url)
 
 	# Initialize shared data object
 	data = {}
