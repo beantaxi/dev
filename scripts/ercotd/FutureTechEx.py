@@ -1,2 +1,0 @@
-class FutureTechEx(Exception):
-	pass

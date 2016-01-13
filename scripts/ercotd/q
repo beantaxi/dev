@@ -1,8 +1,0 @@
-#!/bin/bash
-
-cmd="ls -1t /home/euclid/data/downloads/ | head -n 25 | sort --key=5 --field-separator=. --reverse"
-echo "---------------------------------------"
-echo $cmd
-echo "---------------------------------------"
-eval $cmd
-
