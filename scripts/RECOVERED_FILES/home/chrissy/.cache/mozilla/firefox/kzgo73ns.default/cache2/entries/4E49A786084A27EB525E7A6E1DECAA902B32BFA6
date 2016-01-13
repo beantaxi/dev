@@ -1,0 +1,29 @@
+import lxml.html
+import urllib.parse
+
+file = '/home/chrissy/work/euclid/scripts/reportListing.html'
+file = 'http://mis.ercot.com/misapp/GetReports.do?reportTypeId=12328&reportTitle=DAM+Hourly+LMPs'
+
+xpathFilename = "//tr[td[@class='labelOptional_ind'][text()[contains(., '_csv')]]]/td[1]/text()"
+xpathUrl =      "(//tr[td[@class='labelOptional_ind'][text()[contains(., '_csv')]]])[1]/td[4]/div/a/@href"
+
+
+def getReportUrl (reportListingUrl, reportPath):
+	(path, query) = href.split('?')
+	parts = urllib.parse.urlparse()
+	dataUrl = urllib.parse.urlunparse(parts._replace(path=path, query=query))
+	
+
+html = lxml.html.parse(file)
+filename = html.xpath(xpathFilename)[0].strip()
+url = html.xpath(xpathUrl)[0].strip()
+
+print(filename)
+# print(lxml.html.tostring(url, pretty_print=True))
+print(url)
+
+#for el in els:
+#	if type(el).__name__ == "_ElementUnicodeResult":
+#		print(el)
+#	else:
+#		print(lxml.html.tostring(el, pretty_print=True))

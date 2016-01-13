@@ -1,0 +1,7 @@
+DOWNLOAD_FOLDER = '/tmp/downloads/ercot'
+TABLE_FOLDER = '/home/chrissy/work/euclid/scripts'
+clientCertFile = "ercot-mis-client-and-pk.pem" 
+caCertFile = "ercot-mis-ca.pem"
+pythonPath = "/home/Chrissy/dev/py/venv/main/bin/python3" 
+scriptPath = "/home/Chrissy/work/euclid/scripts/getReportListing.py"
+
