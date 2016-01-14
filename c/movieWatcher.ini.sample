@@ -1,0 +1,5 @@
+[default]
+pythonPath=[path of python exe, possibly in a venv folder]
+scriptPath=[path of sendSns.py]
+watchedPath=[path of directory to watch]
+
