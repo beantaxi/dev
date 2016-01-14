@@ -4,6 +4,35 @@
 #include <sys/inotify.h>
 #include <sys/ioctl.h>
 
+const char* PATH = "/tmp/pub/";
+
+void onRead (int fd, int nToRead)
+{
+	int rc;
+
+	printf("%d byte(s) to read!\n", nToRead);
+	char* buf = malloc(nToRead);
+	read(fd, buf, nToRead);
+	if (rc == -1)
+	{
+		perror("Error on read()");
+		exit(EXIT_FAILURE);
+	}
+	struct inotify_event* ev = (struct inotify_event*)buf;
+	printf("wd=%d\n", ev[0].wd);
+	printf("mask=%d\n", ev[0].mask);
+	printf("cookie=%d\n", ev[0].cookie);
+	printf("len=%d\n", ev[0].len);
+	printf("name=%s\n", ev[0].name);
+
+	const char* pyPath = "/home/ubuntu/dev/py/venv/main/bin/python3";
+	const char* scriptPath = "/home/ubuntu/work/euclid/scripts/sendSns.py";
+	char* args = ev[0].name;
+	char cmd[255];
+	sprintf(cmd, "%s %s %s", pyPath, scriptPath, args);
+	system(cmd);
+}
+
 
 int main ()
 {
@@ -17,8 +46,7 @@ int main ()
 		exit(EXIT_FAILURE);
 	}
 	
-	const char* path = "/home/chrissy/Dropbox/euclid/pub";
-	int wd = inotify_add_watch(fd, path, IN_CREATE | IN_MODIFY);
+	int wd = inotify_add_watch(fd, PATH, IN_CREATE | IN_MODIFY);
 	if (wd == -1)
 	{
 		perror("Error with inotify_add_watch()");
@@ -46,8 +74,9 @@ int main ()
 		perror("Error with ioctl()");
 		exit(EXIT_FAILURE);
 	}
-	printf("%d byte(s) to read!", nToRead);
-
+	
+	onRead(pfd.fd, nToRead);
+	
 	rc = inotify_rm_watch(fd, wd);
 	if (rc == -1)
 	{
