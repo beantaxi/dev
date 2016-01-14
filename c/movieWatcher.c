@@ -1,12 +1,21 @@
 #include <poll.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/inotify.h>
 #include <sys/ioctl.h>
+#include "ini.h"
 
 const char* PATH = "/tmp/pub/";
 
-void onRead (int fd, int nToRead)
+typedef struct
+{
+	char* watchedPath;
+	char* pythonPath;
+	char* scriptPath;
+} config;
+
+void onRead (int fd, int nToRead, config* cfg)
 {
 	int rc;
 
@@ -25,18 +34,53 @@ void onRead (int fd, int nToRead)
 	printf("len=%d\n", ev[0].len);
 	printf("name=%s\n", ev[0].name);
 
-	const char* pyPath = "/home/ubuntu/dev/py/venv/main/bin/python3";
-	const char* scriptPath = "/home/ubuntu/work/euclid/scripts/sendSns.py";
 	char* args = ev[0].name;
 	char cmd[255];
-	sprintf(cmd, "%s %s %s", pyPath, scriptPath, args);
+	sprintf(cmd, "%s %s %s", cfg->pythonPath, cfg->scriptPath, args);
+	printf("cnd=%s\n", cmd);
 	system(cmd);
+}
+
+
+int configHandler (void* user, const char* section, const char* name, const char* value)
+{
+	#define MATCH(s, n) strcmp(section, s) == 0 && strcmp(name, n) == 0
+	config* cfg = (config*)user;
+
+	printf("section=%s name=%s value=%s\n", section, name, value);
+	if (MATCH("default", "watchedPath"))
+	{
+		puts("Matched watchedPath");
+		cfg->watchedPath = strdup(value);
+	}
+	else if (MATCH("default", "pythonPath"))
+	{
+		puts("Matched pythonPath");
+		cfg->pythonPath = strdup(value);
+	}
+	else if (MATCH("default", "scriptPath"))
+	{
+		puts("Matched scriptPath");
+		cfg->scriptPath= strdup(value);
+	}
+
+	return 0;
 }
 
 
 int main ()
 {
 	int rc;		// generic return code from various functions
+	
+	const char* configFile = "movieWatcher.ini";
+	config cfg;
+	rc = ini_parse(configFile, configHandler, &cfg);
+	if (rc < 0)
+	{
+		perror("Error on ini_parse()");
+		exit(EXIT_FAILURE);
+	}
+
 
 	// Watch for movie file being created
 	int fd = inotify_init();
@@ -46,7 +90,8 @@ int main ()
 		exit(EXIT_FAILURE);
 	}
 	
-	int wd = inotify_add_watch(fd, PATH, IN_CREATE | IN_MODIFY);
+	printf("watchedPath=%s\n", cfg.watchedPath);
+	int wd = inotify_add_watch(fd, cfg.watchedPath, IN_CREATE | IN_MODIFY);
 	if (wd == -1)
 	{
 		perror("Error with inotify_add_watch()");
@@ -75,7 +120,7 @@ int main ()
 		exit(EXIT_FAILURE);
 	}
 	
-	onRead(pfd.fd, nToRead);
+	onRead(pfd.fd, nToRead, &cfg);
 	
 	rc = inotify_rm_watch(fd, wd);
 	if (rc == -1)
