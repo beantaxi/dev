@@ -105,30 +105,33 @@ int main ()
 		exit(EXIT_FAILURE);
 	}
 
-	// poll until there is something left to read.
-	// This is necessary because we will be reading a variable number of bytes
-	// (eg the name of the file)
-	struct pollfd pfd;
-	pfd.fd = fd;
-	pfd.events = POLLIN;
-	rc = poll(&pfd, 1, -1);
-	if (rc == -1)
+	while (1)
 	{
-		perror("Error with poll()");
-		exit(EXIT_FAILURE);
-	}
+		// poll until there is something left to read.
+		// This is necessary because we will be reading a variable number of bytes
+			// (eg the name of the file)
+		struct pollfd pfd;
+		pfd.fd = fd;
+		pfd.events = POLLIN;
+		rc = poll(&pfd, 1, -1);
+		if (rc == -1)
+		{
+			perror("Error with poll()");
+			exit(EXIT_FAILURE);
+		}
 
-	// Since there is something to read, get the byte count
-	int nToRead;
-	rc = ioctl(pfd.fd, FIONREAD, &nToRead);
-	if (rc == -1)
-	{
-		perror("Error with ioctl()");
-		exit(EXIT_FAILURE);
-	}
-	
-	onRead(pfd.fd, nToRead, &cfg);
-	
+		// Since there is something to read, get the byte count
+		int nToRead;
+		rc = ioctl(pfd.fd, FIONREAD, &nToRead);
+		if (rc == -1)
+		{
+			perror("Error with ioctl()");
+			exit(EXIT_FAILURE);
+		}
+		
+		onRead(pfd.fd, nToRead, &cfg);
+	}	
+
 	rc = inotify_rm_watch(fd, wd);
 	if (rc == -1)
 	{
