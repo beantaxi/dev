@@ -2,11 +2,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <syslog.h>
 #include <sys/inotify.h>
 #include <sys/ioctl.h>
 #include "ini.h"
 
-const char* PATH = "/tmp/pub/";
 
 typedef struct
 {
@@ -14,6 +14,7 @@ typedef struct
 	char* pythonPath;
 	char* scriptPath;
 } config;
+
 
 void onRead (int fd, int nToRead, config* cfg)
 {
@@ -34,10 +35,16 @@ void onRead (int fd, int nToRead, config* cfg)
 	printf("len=%d\n", ev[0].len);
 	printf("name=%s\n", ev[0].name);
 
+	char msg[255];
+	openlog(NULL, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
+	syslog(LOG_INFO, "File changed: %s\n", ev[0].name);
+	closelog();
+
+
 	char* args = ev[0].name;
 	char cmd[255];
 	sprintf(cmd, "%s %s %s", cfg->pythonPath, cfg->scriptPath, args);
-	printf("cnd=%s\n", cmd);
+	printf("cmd=%s\n", cmd);
 	system(cmd);
 }
 
