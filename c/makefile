@@ -5,3 +5,6 @@ getdir: getdir.c
 
 movieWatcher: movieWatcher.c
 	gcc -o movieWatcher ini.c movieWatcher.c
+
+socketReader: socketReader.c
+	gcc -o socketReader socketReader.c
