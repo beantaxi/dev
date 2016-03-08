@@ -9,6 +9,8 @@ movieWatcher: movieWatcher.c
 
 logReader: logReader.c
 	gcc $(CFLAGS) -o logReader logReader.c
+	sudo cp logReader.c /usr/local/src
+	sudo gcc -o /usr/local/bin/logReader /usr/local/src/logReader.c
 
 socketLib: socketLib.c socketLib.h 
 	gcc $(CFLAGS) -c socketLib.c
