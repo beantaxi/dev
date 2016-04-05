@@ -1,2 +1,2 @@
 default: funcs.sh
-	sudo cp funcs.sh /usr/local/bin
+	sudo cp --preserve funcs.sh /usr/local/bin
