@@ -1,0 +1,4 @@
+This module should do the following
+
+Given an extracts folder, and an archive folder ...
+	Find all the files in the extracts folder, and put them in tars in the archive folder
