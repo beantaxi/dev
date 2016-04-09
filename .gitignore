@@ -1,5 +1,5 @@
 /aws
-/py
+/py/venvs
 /tmp
 **/*.swp
 /ol3.14.2-dist
