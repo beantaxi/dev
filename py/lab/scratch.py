@@ -1,10 +1,7 @@
 import sys
 
 try:
-	n = 1/0
+	raise Exception("some message")
 except Exception as ex:
-	(exType, exInst, tb) = sys.exc_info()
-	for line in tb:
-#		print(type(line))
-#		(exType, exInst, tb) = line
-		print(str(line))
+	print((str(ex) + "\r").encode('utf-8'))
+

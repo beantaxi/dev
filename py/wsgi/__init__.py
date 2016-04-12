@@ -26,13 +26,14 @@ def application (env, start_response):
 		headers = [('Content-type', 'text/plain')]
 		start_response('500 Oops', headers, sys.exc_info())
 		resp = ""
-		resp += ex.message + '\r'
-		resp += '\r'
+		resp += str(ex) + '\r'
+		resp += "\r"
 		(exType, exInst, tb) = sys.exc_info()
 		lines = tracebackAsLines(tb)
 		for line in lines:
-			resp += line + '\r'
-	return resp
+			resp += line + "\r"
+	return [resp.encode('utf-8')]
+#	return [resp]
 
 
 def getDateRange (datestr):
@@ -93,5 +94,3 @@ def tracebackAsLines (tb):
 		s = "at {}:{} in {}() {}".format(file, ln, fn, msg)
 		lines.append(s)
 	return lines
-
-
