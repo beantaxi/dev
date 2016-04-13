@@ -1,3 +1,5 @@
+import re
+
 def getDateRange (datestr):
 	if isDateTime(datestr):
 		dtRange = parseDateTime(datestr)
@@ -48,4 +50,3 @@ def parseSingleDay (datestr):
 	dtRange = (dtStart, dtEnd)
 	return dtRange
 	dtRange = ("No Clue", "No Clue")
-
