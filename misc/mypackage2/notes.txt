@@ -1,0 +1,131 @@
+importlib.import_module() and __import__() can be used to import
+
+Two steps to import:
+1. Search for named module
+	- this is a call to __import__()
+	- returned value is used for the name binding
+2. Bind the result of the search to a name in local scope
+
+__import__() performs module serarch, module creation (if found), and side effects such as importing parent packages and updating sys.modules and other caches. However it does NOT do any name binding
+
+import uses __import__() but importlib.import_module() does not have to
+
+On import, a module object gets created when a module is found, and an ImportError is raised if the module is not found
+
+importlib is easier to use than __import__(), for doing imports programatically
+
+
+PACKAGES
+
+Subtype of module
+Sort of like a directory/folder, and modules are sort of like files
+Any module with a __path__ attribute is a package
+Two types of packages: regular and namespace
+	Regular package: typically a folder with an __init__.py file
+		__init__.py gets executed on load
+		Objects __init__.py defines are bound to names in the packages namespace
+		Parent packages get their __init__ run as well
+	Namespace package: composite of portions
+		Each portion is a subpackage
+		Can be anywhere on the filesystem, or not be on the filesystem at all
+		A namespace package's __path__ is a custom iterable
+		PEP 420 has more detail
+
+SEARCHING
+
+Requries fully qualified module name
+Parent modules get imported, as part of the search for submodules
+
+sys.modules
+	module cache
+	first place checked
+	module name => module mapping
+	if name maps to None, ImportError is raised (this 'caches' failed lookups)
+
+finders and loaders
+	often combined as 'importers' - an importer is a finder that can also load
+	Builtin finders/importers:
+		Importer for builtin modules
+		Finder for frozen modules
+		Finder which searches import path 
+			list of locations, including paths and/or zip files
+			extensible
+	Finders done return module specs which contain loaders, not the loaders themselves (3.4)
+
+import hooks
+	primary extensibility mechanism for imports
+	meta hooks
+		called at the start of import processing
+		first step except for sys.modules cache lookup (even before builtin modules)
+		registered by adding finders to sys.meta_path
+	import path hooks
+		called as part of sys.path processing
+		registered by adding callables to sys.path_hooks
+
+sys.meta_path
+	list of meta path finder objects
+	each implements find_spec
+		find_spec(name, importPath, targetModule=None)
+			name = fully qualified module name
+			importPath = parent package's __path__, or None if top level
+			module = existing module object, which is the target of loading later (only happened during reload)
+		Can do whatever it wanted to find the module
+		returns module spec object, or None
+	If no finders return a spec, ImportError is raised (but presumably caught elsewhere?)
+	If the module is a submodule, metapath gets traverse once per parent, ie 4 times for a.b.c.d
+	Python's 3 builtin finders (builtin, frozen, import path), make up the default meta_path
+
+loading
+	spec.loader is used to load module
+	key loader functions: create_module(), exec_module()
+	the loader puts the module in sys.modules before module code is executed
+		thus if a module loads itself, it will only execute the module code once ... I think
+	if a module load fails, but parent module(s) succed, the parent(s) will be in sys.modules
+ 	module execution (exec_module) is delegated to the loader
+ 		loader is in control of populating a module's namespace
+	it's *possible*, that the module object passed to exec_module, is not the module that gets returned
+
+loaders
+	ImportError if exec_module fails
+	If create_module() doesn't exist, the import process creates the module itself (which might be fine)
+
+submodules
+	loading a submodule, puts a binding to it in its parents module
+	
+module spec
+	Defined by ModuleSpec class
+		__name__      Fully qualified name
+		__loader__    None for namespace packages
+		__file__      origin of the package, eg file path
+		__path__      Package: list of strings where to find submodules. Non-package: None
+		loader_state  Module-specific data for use during loading
+		__cached__    Path to where to store compiled module
+		__package__   Fully qualified name of package which owns this
+		has_location  True if __file__ is a loadable location
+
+module attributes
+	populated by import for each module, based on module spec
+	__name__
+	__loader__
+	__package__
+	__spec__
+	__path__
+	__file__
+	__cached__
+
+module.__path__
+	set for all packages. If __path__ exists, module is a package
+	__path__ is a (possibly empty) iterable of strings
+
+module.repr()
+	if __spec__: use spec's name, loader, origin, and has_location to determine repr
+	if __file__: use file as part of repr()
+	elif __loader__: use loader's repr()
+	elif use module.__name__
+
+
+
+
+
+
+
