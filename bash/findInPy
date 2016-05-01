@@ -1,0 +1,4 @@
+#!/bin/bash
+
+dir=${2:-"."}
+grep -nr --include "*.py" "$1" "$dir"

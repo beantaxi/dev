@@ -1,0 +1,4 @@
+#!/bin/bash
+
+dir=${2:-"."}
+grep -nr --include "*.sh" "$1" "$dir"

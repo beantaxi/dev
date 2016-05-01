@@ -1,2 +1,2 @@
 default: funcs.sh
-	sudo cp --preserve funcs.sh /usr/local/bin
+	sudo cp --preserve -t /usr/local/bin findInSh findInPy funcs.sh
