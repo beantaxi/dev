@@ -1,6 +1,7 @@
 **/*.swp
 **/__pycache__
 /aws
+/py/bravo.plugin
 /py/venvs
 /py/**/*.pyc
 /tmp
