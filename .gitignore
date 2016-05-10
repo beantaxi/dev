@@ -2,6 +2,7 @@
 **/__pycache__
 /aws
 /py/bravo.plugin
+/py/venv
 /py/venvs
 /py/**/*.pyc
 /tmp
