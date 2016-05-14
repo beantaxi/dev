@@ -32,12 +32,7 @@ server {
 		# alias index.html;
 	}
 	
-	location /ercotd
-	{
-		# root /usr/share/www;
-		alias /usr/share/www/ercotd;
-		try_files $uri $uri/ =404;
-	}
+	location /ercotd	{ try_files $uri @gunicornProxy; }
 	
 	location / {
 		# First attempt to serve request as file, then
@@ -47,26 +42,6 @@ server {
 		# Uncomment to enable naxsi on this location
 		# include /etc/nginx/naxsi.rules
 	}
-}
-
-
-upstream gunicorn
-{
-	server unix:/tmp/splunge.sock fail_timeout=0;			
-}
-
-
-server
-{
-	listen 80;
-	server_name ercotd.ooc2000.com;
-	root /usr/share/www/ercotd;
-
-
-	location /extract	{ try_files $uri @gunicornProxy; }
-	location / { root /usr/share/www/ercotd; }
-	
-	
 	
 	location @gunicornProxy
 	{
@@ -75,4 +50,30 @@ server
 		proxy_redirect off;
 		proxy_pass http://gunicorn;
 	}
+}
+
+server {
+	listen 7000;
+	root /usr/share/nginx/html/ercotd;
+	index index.html index.htm;
+
+	# Make site accessible from http://localhost/
+	server_name localhost;
+
+	# location = /favicon.ico { alias /usr/share/nginx/html/ercotd/favicon.ico; }
+	
+	location /	{ try_files $uri @gunicornProxy; }
+	
+	location @gunicornProxy
+	{
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header Host $http_host;
+		proxy_redirect off;
+		proxy_pass http://gunicorn;
+	}
+}
+
+upstream gunicorn
+{
+	server unix:/tmp/splunge.sock fail_timeout=0;			
 }
