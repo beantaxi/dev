@@ -12,6 +12,7 @@ class InvalidMethodEx(Exception):
 		s = "Allow: {}".format(', '.join(self.validMethods))
 		return s
 
+
 class GeneralClientEx(Exception):
 	def __init__ (self, msg):
 		self.msg = msg
@@ -23,3 +24,15 @@ class GeneralClientEx(Exception):
 	def getWarningHeaderValue (self):
 		s = "299 %s" % self.msg
 		return s
+
+
+class ModuleNotFoundEx (Exception):
+	def __init__ (self, moduleName):
+		self.moduleName = moduleName
+
+	def __str__ (self):
+		s = "Module '{}' not found".format(self.moduleName)
+		return s
+
+
+	

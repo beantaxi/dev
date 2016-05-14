@@ -1,15 +1,29 @@
 from importlib.machinery import FileFinder
 from importlib.machinery import SourceFileLoader
+import importlib.util 
 import os.path
+from wsgi import *
 
 def loadModule (path):
 	folder = os.path.dirname(path)
+	print("folder=" + folder)
+
 	filename = os.path.basename(path)
-	(moduleName, dot, extension) = filename.rpartition(filename)
+	print("filename=" + filename)
+
+	(moduleName, dot, extension) = filename.rpartition('.')
+	print("(moduleName, dot, extension)=({}, {}, {})".format(moduleName, dot, extension))
+
 	loaderArgs = (SourceFileLoader, [dot+extension])
 	finder = FileFinder(folder, loaderArgs)
 	spec = finder.find_spec(moduleName)
+	print("spec=" + str(spec))
+	if not spec:
+		raise ModuleNotFoundEx(moduleName)
+
 	module = importlib.util.module_from_spec(spec)
+	print("module=" + str(module))
+
 	loader = spec.loader
 	module.moduleSpec = spec
 	module.exec = lambda: loader.exec_module(module)
