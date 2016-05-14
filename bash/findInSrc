@@ -5,5 +5,6 @@ if [ $# -lt 1 ]; then
 	exit -1
 fi
 
-PYSRC=/usr/local/lib/python3.4
+PYSRC=$(python -c "import os.path; import datetime; print(os.path.dirname(datetime.__file__))")
+
 grep -nr --include "*.py" "$1" $PYSRC 

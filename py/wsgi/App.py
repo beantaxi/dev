@@ -15,6 +15,48 @@ def createAndEnhanceModule (moduleName, path):
 	module.validateMethod = validateMethod
 	return module
 
+
+def enrichModule (module):
+	module.validateMethod = validateMethod
+	# import exceptions
+
+
+def execModule (module):
+	attrs1 = set(dir(module))
+	module.exec()
+	attrs2 = set(dir(module))
+	newAttrs = [el for el in attrs2 if el not in attrs1 and el != '__builtins__']
+	args = {}
+	for attr in newAttrs:
+		val = getattr(module, attr)
+		if not inspect.isfunction(val) and not inspect.isclass(val):
+			args[attr] = getattr(module, attr)
+	return args
+
+
+def execTemplate (templatePath, args):
+	jloader = jinja2.FileSystemLoader(os.getcwd())
+	jenv = jinja2.Environment()
+	templateName = os.path.basename(templatePath)
+	jtemplate = jloader.load(jenv, templateName)
+	s = jtemplate.render(args)
+	return s 
+
+
+def getModulePath (env):
+	path = env['PATH_INFO']
+	moduleFilename = path[1:].lpartition('/')[0] + '.py'
+	modulePath = os.path.join(os.getcwd(), moduleFilename)
+	return modulePath
+
+
+def getTemplatePath (env):
+	path = env['PATH_INFO']
+	templateFilename = path[1:].lpartition('/')[0] + '.pyp'
+	templatePath = os.path.join(os.getcwd(), templateFilename)
+	return templatePath
+
+
 def validateMethod (method, methods):
 	if not method in methods:
 		raise InvalidMethodEx(method, methods)
@@ -27,37 +69,45 @@ class Response:
 
 class Application ():
 	def __init__ (self, env, start_response):
+		print("os.getcwd()={}".format(os.getcwd()))
 		self.env = env
 		self.startResponse = start_response
 		self.response = Response()
 		try:
-			path = env['PATH_INFO']
-			parts = path.split('/')
-			moduleStub = parts[1]	
-#			moduleName = 'wsgi.{}'.format(moduleStub)
-#			modulePath = 'wsgi/{}.py'.format(moduleStub)
-#			module = createAndEnhanceModule(moduleName, modulePath)
-			filename = '{}.py'.format(moduleStub)
-			args = {}
-			g = {}
-			g['validateMethod'] = validateMethod
-			g['app'] = self 
-			g['args'] = args
-			with open(filename) as f:
-				code = compile(f.read(), filename, 'exec')
-				exec(code, g)
-#			module.validateMethod = validateMethod
-#			module.app = self
-#			args = []
-#			module.args = args
-#			validate = getattr(module, 'validate')
-#			generatePage = getattr(module, 'generatePage')
-#			validate(self)
-			self.startResponse('200 OK', [('Content-type', 'text/html')])
-			jloader = jinja2.FileSystemLoader('/home/ubuntu/dev/py/wsgi/templates')
-			jenv = jinja2.Environment()
-			jtemplate = jloader.load(jenv, 'extracts.pyp')
-			self.response.text = jtemplate.render(args)
+			modulePath = getModulePath(env)
+			module = MagicLoader.getModule(fullPath)
+			enrichModule(module)
+			args = execModule(module)
+			templatePath = getTemplatePath(env)
+			self.response.text = execTemplate(templatePath, args)
+
+# 			path = env['PATH_INFO']
+# 			parts = path.split('/')
+# 			moduleStub = parts[1]	
+# #			moduleName = 'wsgi.{}'.format(moduleStub)
+# #			modulePath = 'wsgi/{}.py'.format(moduleStub)
+# #			module = createAndEnhanceModule(moduleName, modulePath)
+# 			filename = '{}.py'.format(moduleStub)
+# 			args = {}
+# 			g = {}
+# 			g['validateMethod'] = validateMethod
+# 			g['app'] = self 
+# 			g['args'] = args
+# 			with open(filename) as f:
+# 				code = compile(f.read(), filename, 'exec')
+# 				exec(code, g)
+# #			module.validateMethod = validateMethod
+# #			module.app = self
+# #			args = []
+# #			module.args = args
+# #			validate = getattr(module, 'validate')
+# #			generatePage = getattr(module, 'generatePage')
+# #			validate(self)
+# 			self.startResponse('200 OK', [('Content-type', 'text/html')])
+# 			jloader = jinja2.FileSystemLoader('/home/ubuntu/dev/py/wsgi/templates')
+# 			jenv = jinja2.Environment()
+# 			jtemplate = jloader.load(jenv, 'extracts.pyp')
+# 			self.response.text = jtemplate.render(args)
 		except GeneralClientEx as ex:
 			print(ex)
 			headers = [
