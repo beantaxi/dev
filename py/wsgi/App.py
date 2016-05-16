@@ -22,7 +22,10 @@ def createAndEnhanceModule (moduleName, path):
 
 def enrichModule (module, env, self):
 	reqMethod = env['REQUEST_METHOD']
-	module.http = env
+	module.http = lambda: None 
+	module.http.env = env
+	module.http.method = env['REQUEST_METHOD']
+	module.http.path = env['PATH_INFO']
 	module.addHeader = lambda x, y: self.response.headers.append((x, y))
 	module.validateMethod = lambda x: validateMethod(reqMethod, x) 
 	module.setContentType = lambda x: self.response.headers.append(('Content-type', x))
@@ -34,7 +37,7 @@ def execModule (module):
 	module.exec()
 	attrs2 = set(dir(module))
 	newAttrs = [el for el in attrs2 if el not in attrs1 and el != '__builtins__']
-	args = {}
+	args = {'http': module.http}
 	for attr in newAttrs:
 		val = getattr(module, attr)
 		if not inspect.isfunction(val) and not inspect.isclass(val):
@@ -68,7 +71,7 @@ def getTemplatePath (env):
 def validateMethod (method, methods):
 	if isinstance(methods, str):
 		methods = [ methods ]
-	if not method in methods:
+	if not method in [s.upper() for s in methods]:
 		raise InvalidMethodEx(method, methods)
 
 
@@ -131,15 +134,16 @@ class Application ():
 			]
 			self.startResponse("500", headers, sys.exc_info())
 			self.response.text = "An error has occured on the server."
-		for (key, val) in self.response.headers:
-			if key == 'Content-type':
-				break
 		else:
-			self.response.headers.append(('Content-type', 'text/html'))
-		print("headers")
-		for (key, val) in self.response.headers:
-			print("{}=>{}".format(key, val))
-		self.startResponse('200 OK', self.response.headers)
+			for (key, val) in self.response.headers:
+				if key == 'Content-type':
+					break
+			else:
+				self.response.headers.append(('Content-type', 'text/html'))
+			print("headers")
+			for (key, val) in self.response.headers:
+				print("{}=>{}".format(key, val))
+			self.startResponse('200 OK', self.response.headers)
 #	extractId = parts[2]
 #	datestr = parts[3]
 	
