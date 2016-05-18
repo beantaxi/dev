@@ -2,13 +2,12 @@
 
 import sys
 import traceback
-from wsgi import utils
-from wsgi.DateRangeParser import DateRangeParser
-from wsgi.Exceptions import GeneralClientEx
-from wsgi.Exceptions import InvalidMethodEx
-from wsgi.Exceptions import ModuleNotFoundEx
-from wsgi.App import Application
-from wsgi import MagicLoader
+from splunge.Exceptions import GeneralClientEx
+from splunge.Exceptions import InvalidMethodEx
+from splunge.Exceptions import ModuleNotFoundEx
+from splunge.PathString import PathString
+from splunge import MagicLoader
+from splunge.App import Application
 
 __all__ = ['Application', 'MagicLoader']
 

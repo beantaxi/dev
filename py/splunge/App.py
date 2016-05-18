@@ -6,13 +6,12 @@ import os.path
 import sys
 import traceback
 import jinja2
-from wsgi import utils
-from wsgi import DateRangeParser
-from wsgi import GeneralClientEx
-from wsgi import InvalidMethodEx
-from wsgi import ModuleNotFoundEx 
-from wsgi import MagicLoader
-# from wsgi import extracts
+from splunge import GeneralClientEx
+from splunge import InvalidMethodEx
+from splunge import ModuleNotFoundEx 
+from splunge import MagicLoader
+from splunge import PathString
+# from splunge import extracts
 
 def createAndEnhanceModule (moduleName, path):
 	module = imp.load_source(moduleName, path)
@@ -25,7 +24,8 @@ def enrichModule (module, env, self):
 	module.http = lambda: None 
 	module.http.env = env
 	module.http.method = env['REQUEST_METHOD']
-	module.http.path = env['PATH_INFO']
+	module.http.path = PathString(env['PATH_INFO'])
+	# module.http.pathParts = env['PATH_INFO'][1:].split('/')
 	module.addHeader = lambda x, y: self.response.headers.append((x, y))
 	module.validateMethod = lambda x: validateMethod(reqMethod, x) 
 	module.setContentType = lambda x: self.response.headers.append(('Content-type', x))
@@ -68,6 +68,13 @@ def getTemplatePath (env):
 	return templatePath
 
 
+def renderString (s, args):
+	jenv = jinja2.Environment()
+	jtemplate = jenv.from_string(s)
+	s = jtemplate.render(args)
+	return s
+
+
 def validateMethod (method, methods):
 	if isinstance(methods, str):
 		methods = [ methods ]
@@ -98,11 +105,22 @@ class Application ():
 			except ModuleNotFoundEx as ex:
 				print('Module {} not found - skipping pre-processing'.format(ex.moduleName))
 				args = {}
-			templatePath = getTemplatePath(env)
-			print("templatePath=" + templatePath)
-			print("About to execute template ...")
-			self.response.text = execTemplate(templatePath, args)
-			print("done")
+			if '_' in args:
+				if isinstance(args['_'], bytes):
+					self.response.text = args['_']
+				else:
+					self.response.text = renderString(args['_'], args)
+			else:
+				templatePath = getTemplatePath(env)
+				if not os.path.isfile(templatePath):
+					self.response.headers.append(('Content-Type', 'text/plain'))
+					for name in sorted(args):
+						value = args[name]
+						self.response.text += "{} = {}\n".format(name, value)
+				else:
+					print("templatePath=" + templatePath)
+					print("About to execute template ...")
+					self.response.text = execTemplate(templatePath, args)
 		except GeneralClientEx as ex:
 			print(ex)
 			headers = [
@@ -136,13 +154,10 @@ class Application ():
 			self.response.text = "An error has occured on the server."
 		else:
 			for (key, val) in self.response.headers:
-				if key == 'Content-type':
+				if key.lower() == 'content-type':
 					break
 			else:
-				self.response.headers.append(('Content-type', 'text/html'))
-			print("headers")
-			for (key, val) in self.response.headers:
-				print("{}=>{}".format(key, val))
+				self.response.headers.append(('Content-Type', 'text/html'))
 			self.startResponse('200 OK', self.response.headers)
 #	extractId = parts[2]
 #	datestr = parts[3]
@@ -169,7 +184,11 @@ class Application ():
 #			resp += line + "\r"
 	def __iter__ (self):
 		print("__iter__ being called")
-		yield self.response.text.encode('utf-8')
+		if isinstance(self.response.text, bytes):
+			content = self.response.text
+		else:
+			content = self.response.text.encode('utf-8')
+		yield content
 
 
 # 	def generatePage (self):
@@ -185,7 +204,7 @@ class Application ():
 # 			'dtEnd': dtEnd
 # 		}
 # 
-# 		jloader = jinja2.FileSystemLoader('/home/ubuntu/dev/py/wsgi/templates')
+# 		jloader = jinja2.FileSystemLoader('/home/ubuntu/dev/py/splunge/templates')
 # 		jenv = jinja2.Environment()
 # 		jtemplate = jloader.load(jenv, 'extracts.pyp')
 # 		self.response.text = jtemplate.render(args)
@@ -204,8 +223,8 @@ class Application ():
 # 			path = env['PATH_INFO']
 # 			parts = path.split('/')
 # 			moduleStub = parts[1]	
-# #			moduleName = 'wsgi.{}'.format(moduleStub)
-# #			modulePath = 'wsgi/{}.py'.format(moduleStub)
+# #			moduleName = 'splunge.{}'.format(moduleStub)
+# #			modulePath = 'splunge/{}.py'.format(moduleStub)
 # #			module = createAndEnhanceModule(moduleName, modulePath)
 # 			filename = '{}.py'.format(moduleStub)
 # 			args = {}
@@ -224,7 +243,7 @@ class Application ():
 # #			generatePage = getattr(module, 'generatePage')
 # #			validate(self)
 # 			self.startResponse('200 OK', [('Content-type', 'text/html')])
-# 			jloader = jinja2.FileSystemLoader('/home/ubuntu/dev/py/wsgi/templates')
+# 			jloader = jinja2.FileSystemLoader('/home/ubuntu/dev/py/splunge/templates')
 # 			jenv = jinja2.Environment()
 # 			jtemplate = jloader.load(jenv, 'extracts.pyp')
 # 			self.response.text = jtemplate.render(args)

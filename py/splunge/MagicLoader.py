@@ -2,7 +2,7 @@ from importlib.machinery import FileFinder
 from importlib.machinery import SourceFileLoader
 import importlib.util 
 import os.path
-from wsgi import *
+from splunge import *
 
 def loadModule (path):
 	folder = os.path.dirname(path)
