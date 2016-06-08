@@ -6,3 +6,4 @@
 *.swp
 a.out
 movieWatcher.ini
+coreutils-src/**
