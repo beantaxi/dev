@@ -1,4 +1,4 @@
-from mypackage2 import *
+from mypackage2 import UsefulClass
 
 def createUsefulObject ():
 	# return UsefulClass()
