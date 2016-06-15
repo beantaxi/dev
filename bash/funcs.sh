@@ -11,7 +11,6 @@ newScript ()
 	if [ $? -eq 0 ]; then
 		vi + -c'startinsert' $filename
 	fi
-	
 }
 
 checkNoVim ()
