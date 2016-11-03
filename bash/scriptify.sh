@@ -4,19 +4,16 @@ SteelyDan_Album_ShowBizKids='spotify:album:6OiTM5PNqUE6FafIoR4xnF'
 Nrbq_Track_WeTravelTheSpaceways='spotify:track:0jv1y12hwJhHEYdbmyJRWP'
 VA_Playlist_CoffeehouseJazzVol2='spotify:album:17bhbh3BUa0QciL71PFcJz'
 
-URI_Chill='spotify:album:17vHPMmoxN5B8cdhCDeMTe'
-VA_Playlist_Blast='spotify:user:1230186738:playlist:6QaHXC4J18RpJrBJPnai7t'
+VA_Chill='spotify:album:17vHPMmoxN5B8cdhCDeMTe'
+VA_Blast='spotify:user:1230186738:playlist:6QaHXC4J18RpJrBJPnai7t'
 
 conn=org.mpris.MediaPlayer2.spotify
 obj=/org/mpris/MediaPlayer2
 inf=org.mpris.MediaPlayer2.Player
 
 
-blast ()
-{
-	choose VA_Playlist_Blast
-}
-
+blast () { choose VA_Blast; }
+chill () { choose VA_Chill; }
 
 choose ()
 {
@@ -57,8 +54,8 @@ dbusSend ()
 		return 1
 	fi
 
-	api="$1"
-	args="${@:2}"
+	api=$1
+	args=${@:-2}
 	echo api=$api
 	echo args=$args
 	if [[ -z $args ]]; then
