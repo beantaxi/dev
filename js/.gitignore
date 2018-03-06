@@ -1,1 +1,2 @@
-node_modules/
+require/node_modules/
+require/require.js
