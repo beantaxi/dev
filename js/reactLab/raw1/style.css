@@ -1,0 +1,35 @@
+.entry
+{
+	border: 1px solid blue;
+	margin-bottom: 5px;
+	margin-top: 5px;
+	padding-bottom: 30px;
+	padding-left: 5px;
+	padding-top: 30px;
+}
+
+.entry span
+{
+	display: inline-block;
+}
+
+.entryTitle
+{
+	color: blue;
+	font-family: Helvetica;
+	font-size: 18pt;
+	width: 220px;
+}
+
+.entryText
+{
+	color: black;
+	font-family: Helvetica;
+	font-size: 14pt;
+}
+
+#thing 
+{
+	font-family: Helvetica;
+	font-size: 15pt
+}

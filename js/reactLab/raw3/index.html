@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset='uft-8'/>
+		<title>I'm a React App!</title>
+	</head>
+	<body>
+		<div id='main'></div>
+		<script src='https://cdn.jsdelivr.net/react/0.14.0-rc1/react.js'></script>
+		<script src='https://cdn.jsdelivr.net/react/0.14.0-rc1/react-dom.js'></script>
+		<script>
+		const el = React.createElement;
+		const br = function () { return el('br', {}); };
+
+
+		const ContactItem = React.createClass(
+		{
+			render: function ()
+			{
+				return (
+      			el('li', {},
+        	  	  	  el('h2', {}, this.props.name),
+        	  	  	  el('a', {href: 'mailto:'+this.props.email}, this.props.email),
+        	  	  	  el('div', {}, this.props.description)
+      			  )
+    	 	   );
+			}
+		});
+
+
+		const ContactList = React.createClass(
+		{
+			render: function ()
+			{
+				const contacts = this.props.contactData.map(function (o) { return el(ContactItem, o); });
+				const h1 = el('h1', {}, 'Contacts');
+				const ul = el('ul', {}, contacts);
+				const elContactList = el('div', {}, h1, ul);
+
+				return elContactList;
+			}
+		});
+
+		const AddContactForm = React.createClass(
+		{
+			render: function ()
+			{
+				const inputName = el('input');
+				const inputEmail = el('input');
+				const description = el('textarea');
+				const submit = el('button', {type: 'submit'}, 'Add');
+				const form = el('form', {}, inputName, br(), inputEmail, br(), description, br(), submit);
+
+				return form;
+			}
+		});
+
+
+		const Page = React.createClass(
+		{
+			render: function ()
+			{
+				const contactList = el(ContactList, {contactData: this.props.contactData});
+				const addContactForm = el(AddContactForm, {});
+				const page = el('div', {}, contactList, addContactForm);
+
+				return page;
+			}
+		});
+
+		const contactData =  
+		[
+			{key: '1', name: 'James Nelson', email: 'james@jamesknelson.com', description: 'Front End Unicorn'},
+			{key: '2', name: 'Citgo Joe', email: 'joe@citgo.com', description: "Lauren's Crush"},
+		];
+				
+		const rootElement = el(Page, {contactData});
+		ReactDOM.render(rootElement, document.getElementById('main'));
+
+		</script>
+	</body>
+</html>

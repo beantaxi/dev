@@ -32,7 +32,9 @@
  * If this works, cast the char* into a struct inotify_event* and return it.
  q*
  * This function dynamically allocates the storage for the event. It is the responsibility
- * of the caller to free the allocated memory.
+ * of the caller to free the allocated memory. The caller can't provide the buffer since the size
+ * of the buffer to return depends on the filesize.
+ * 
  */
 struct inotify_event* getNotifyEvent (int fd)
 {

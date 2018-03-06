@@ -49,7 +49,7 @@ dbusSend ()
 {
 	if [[ $# -lt 1 ]]; then
 		echo "Usage:   dbusSend command [args]"
-		echo "Example: dbusSend Play'"
+		echo "Example: dbusSend Play"
 		echo "Example: dbusSend OpenUri 'spotify:album:6OiTM5PNqUE6FafIoR4xnF'"
 		return 1
 	fi

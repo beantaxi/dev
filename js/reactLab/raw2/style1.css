@@ -1,0 +1,17 @@
+.square
+{
+	width: 100px;
+	height: 100px;
+	background: blue;
+	margin: 10px;
+}
+
+.squareHolder
+{
+	border: 5px solid orange;
+}
+
+
+#main
+{
+}
