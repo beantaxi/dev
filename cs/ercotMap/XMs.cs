@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Net.Http;
@@ -46,6 +47,11 @@ namespace cs
 
             return content;
         }
+
+        static public string GetParentUriString (this Uri uri)
+        {
+            return uri.AbsoluteUri.Remove(uri.AbsoluteUri.Length - uri.Segments[uri.Segments.Length -1].Length - uri.Query.Length);
+        }        
 
         static private string GetStatusLine (this HttpResponseMessage resp)
         {
@@ -143,5 +149,44 @@ namespace cs
 
             return path;
         }
+
+
+        static public IDictionary<string, Uri> ParseLinks (this HtmlDocument html)
+        {
+            var linkMap = new Dictionary<string, Uri>();
+
+            string xpKmlLinks = "//td[@class='dashboard'][2]/div[@class='datestamp']/a";
+            HtmlNodeCollection links = html.DocumentNode.SelectNodes(xpKmlLinks);
+            if (links == null || links.Count == 0)
+            {
+                logger.Warn("no hit");
+            }
+            else
+            {
+                string scheme = Constants.URL_RtmLmp.Scheme;
+                string host = Constants.URL_RtmLmp.Host;
+                int port = Constants.URL_RtmLmp.Port;
+
+                foreach (var hit in links)
+                {
+                    string href = hit.Attributes["href"].Value;
+                    Uri uri;
+                    if (href.StartsWith('/'))
+                    {
+                        uri = new UriBuilder(scheme, host, port, href).Uri;
+                    }
+                    else
+                    {
+                        string sUri = $"{Constants.URL_RtmLmp.GetParentUriString()}/{href}";
+                        uri = new Uri(sUri);
+                    }
+                    Console.WriteLine($"Parent url={Constants.URL_RtmLmp.GetParentUriString()}");
+                    string text = hit.InnerText;
+                    linkMap[text] = uri;
+                }
+            }
+
+            return linkMap;
+        }            
     }
 }
