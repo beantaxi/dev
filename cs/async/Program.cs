@@ -6,9 +6,28 @@ namespace AsyncLab
 {
     sealed public class App
     {
-        public static void Main (string[] argv)
+        public static void Main (string[] args)
         {
-            Console.WriteLine("Done");
+        		Console.WriteLine("About to await ...");
+        		SlowpokeCaller().Wait();
+        		Console.WriteLine("Done.");
+        }
+
+
+        private static Task SlowpokeCaller ()
+        {
+        		Task t = Task.Run(() => Slowpoke());	
+
+        		return t;
+        }
+
+
+        private static void Slowpoke ()
+        {
+        		Console.WriteLine("About to do something slowly ...");
+        		// Task.Delay(1000).Wait();
+        		Thread.Sleep(2000);
+        		Console.WriteLine("Slow operation complete.");
         }
     }
 }

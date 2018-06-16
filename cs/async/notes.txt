@@ -1,0 +1,58 @@
+There are 2 reasons to async a method - because it is performance-bound, or because it is IO-bound
+- CPU bound = A lot of calculations that take a long time
+- I/O bound = The data will be retrieved by another resource - the file system, a service over the network - and we do not know how long that will take
+
+There are 2 user reasons to async operations
+- Responsiveness = Don't give the user a bad experience while the operation is happening
+- Scalability - minimize resource usage under load
+
+Do provide async versions of IO bound methods
+Do NOT provide async versions of CPU bound methods
+
+Consider 3 cases where you might call a CPU bound async method: Console App, GUI app (on the GUI thread), ASP.Net or server side app.
+
+In the case of the console app, you probably don't actually care about scalability or responsiveness, so an async API doesn't help you
+
+In the case of the ASP.Net app, it's a little tricky. In ASP.Net, typically everything's running in a thread pool. The code you right gets called on a Thread in a thread pool. So let's say you call a long running operation on a background thread. First of all, you can't return until the long running operation completes anyway, so you're not going to get a responsiveness win. So you'd only get a scalability win. But here, you're not getting one. When you call the async API from your method, you'll switch from the current Worker Thread, to another worker Thread. The system has to claim a Worker Thread from the Thread Pool ... then, it has to save the current execution context, to resume the current method while the async operation is awaited upon ... then, the Worker Thread needs to be returned to the thread pool... then, the current thread (or yet another Worker Pool thread!) needs to be setup with the saved context from before so the current method should execute. That is a lot of overhead. It is also a lot of unnecessary work for the Thread Pool, which might mislead its heuristics and affect its tuning over time.
+
+Stephen Cleary makes the point that even the existing of the async version of a CPU-bound call in an API is dangerous. Because it's basially always going to be the wrong flavor to call. And yet async is 'good', right? And so if the async methods are there, people will call them.
+
+What about in a GUI app, in the GUI thread? Here, calling a CPU-bound operation asynchronously is a help. It's a responsiveness win, because the GUI thread offloads the operation to a worker thread and the GUI thread can return to pumping messages. Unlike on the server side, we don't have a Worker Thread constraint, and the GUI thread is 'more important' than the worker threads so all the thread-switching overhead is worth it.
+
+But that doesn't mean the async part as to be in the API! Instead the API just has the synch version, and the GUI invokes the synch method asynchronounsly via Task Run.
+
+private async void MyAppForm_OnClick (object o, EventArgs ev)
+{
+	lblStatus.Text = "Processing ...";
+	Task t =  Task.Run(() => myServiceApi.mySynchMethod());
+	await t;
+	lblStatus.Text = "Done";
+}
+
+Here's what happens ...
+
+Task.Run() creates an async Task wrapper for the synchronous operation
+await causes the new Task to be executed in a background thread.
+As part of this, the system saves an execution context, and the GUI thread goes off and does other things
+Once the task execution completes on the background thread, the GUI thread will resume with the saved context.
+
+This kept the application responsive while the long running operation was being processed.
+
+There is a corollary to this:
+
+Do NOT use Task.Run() inside APIs.
+
+Task.Run() has one purpose: To create an asynchronous task, for a synchronous CPU-intensive operation.
+This is something we want to do inside GUI applications in event handlers (which operate on the GUI thread).
+But it's not something we want to do in a Console app, where we don't really care, or inside a Web app, where it actually hurts us.
+So we only want to see Task.Run() inside GUI event handling code. (Usually) Not in Console apps, (usually) not in Web apps, and (never never ever) not in APIs.
+
+
+EXCERCISES
+
+Create a simple API for determining for cryptocurrency mining
+
+- Poll Web sites for Cryptoprices
+- Mine for coins
+
+(

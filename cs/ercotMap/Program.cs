@@ -15,7 +15,7 @@ namespace cs
     {
         
         static private Logger logger = LogManager.GetCurrentClassLogger();
-        static public void Main(string[] args)
+        static public void MainX (string[] args)
         {
             try
             {

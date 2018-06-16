@@ -1,0 +1,411 @@
+complete -F _minimal 
+complete -F _filedir_xspec freeamp
+complete -F _service /etc/init.d/rc
+complete -F _service /etc/init.d/sendsigs
+complete -F _service service
+complete -o filenames -d -X '.[^./]*' -F _loexp_ unopkg
+complete -F _filedir_xspec bibtex
+complete -F _longopt strip
+complete -F _filedir_xspec chromium-browser
+complete -F _filedir_xspec tex
+complete -F _filedir_xspec zathura
+complete -F _command time
+complete -F _command do
+complete -c which
+complete -F _service /etc/init.d/kmod
+complete -F _service /etc/init.d/cgmanager
+complete -o filenames -F _grub_mkconfig grub-mkconfig
+complete -F _root_command gksudo
+complete -F _longopt tail
+complete -F _upstart_reload reload
+complete -F _pacat pacat
+complete -F _service /etc/init.d/hwclock.sh
+complete -F _upstart_stop stop
+complete -F _filedir_xspec lrunzip
+complete -F _upstart_initctl initctl
+complete -F _filedir_xspec amaya
+complete -F _filedir_xspec hbpp
+complete -F _longopt df
+complete -F _service /etc/init.d/mountnfs.sh
+complete -F _command nice
+complete -F _command else
+complete -F _longopt enscript
+complete -F _known_hosts traceroute6
+complete -F _service /etc/init.d/bootmisc.sh
+complete -A binding bind
+complete -F _filedir_xspec lzgrep
+complete -F _known_hosts fping
+complete -F _service /etc/init.d/checkroot.sh
+complete -F _service /etc/init.d/unattended-upgrades
+complete -o dirnames -o filenames -F _apport-bug ubuntu-bug
+complete -F _filedir_xspec ggv
+complete -F _command nohup
+complete -u groups
+complete -F _filedir_xspec lzless
+complete -F _longopt bison
+complete -F _service /etc/init.d/vboxautostart-service
+complete -o filenames -d -X '.[^./]*' -F _loexp_ loimpress
+complete -F _filedir_xspec kdvi
+complete -F _longopt indent
+complete -F _command eval
+complete -F _service /etc/init.d/alsa-utils
+complete -F _longopt vdir
+complete -F _upstart_start start
+complete -o filenames -d -X '.[^./]*' -F _loexp_ lobase
+complete -F _filedir_xspec lbzcat
+complete -F _service /etc/init.d/uuidd
+complete -o filenames -F _grub_mkpasswd_pbkdf2 grub-mkpasswd-pbkdf2
+complete -F _filedir_xspec lilypond
+complete -F _command then
+complete -F _service /etc/init.d/cron
+complete -F _upstart_status status
+complete -F _filedir_xspec sxemacs
+complete -F _filedir_xspec epdfview
+complete -F _longopt head
+complete -F _command aoss
+complete -F _pulseaudio pulseaudio
+complete -F _service /etc/init.d/whoopsie
+complete -F _function typeset
+complete -o filenames -d -X '.[^./]*' -F _loexp_ localc
+complete -F _longopt sha1sum
+complete -F _filedir_xspec texi2dvi
+complete -F _longopt fmt
+complete -F _longopt du
+complete -F _service /etc/init.d/single
+complete -F _service /etc/init.d/cgproxy
+complete -F _filedir_xspec ps2pdf12
+complete -F _filedir_xspec ee
+complete -F _filedir_xspec lbunzip2
+complete -F _filedir_xspec ps2pdf13
+complete -F _longopt rm
+complete -F _service /etc/init.d/binfmt-support
+complete -F _ufw ufw
+complete -o filenames -F _grub_mkrescue grub-mkrescue
+complete -o filenames -F _grub_set_entry grub-reboot
+complete -F _filedir_xspec ps2pdf14
+complete -F _filedir_xspec lzfgrep
+complete -F _service /etc/init.d/vboxdrv
+complete -F _service /etc/init.d/mountkernfs.sh
+complete -F _service /etc/init.d/cgroupfs-mount
+complete -F _filedir_xspec hbrun
+complete -F _filedir_xspec kbabel
+complete -F _filedir_xspec rview
+complete -F _filedir_xspec kaffeine
+complete -F _longopt touch
+complete -F _filedir_xspec xv
+complete -F _longopt tee
+complete -F _known_hosts traceroute
+complete -F _service /etc/init.d/rsyslog
+complete -F _service /etc/init.d/dns-clean
+complete -F _filedir_xspec rgvim
+complete -F _service /etc/init.d/urandom
+complete -F _service /etc/init.d/networking
+complete -F _filedir_xspec oodraw
+complete -F _filedir_xspec elinks
+complete -F _longopt split
+complete -F _service /etc/init.d/mountall-bootclean.sh
+complete -F _service /etc/init.d/halt
+complete -j -P '"%' -S '"' jobs
+complete -F _axi_cache axi-cache
+complete -F _filedir_xspec playmidi
+complete -F _service /etc/init.d/docker
+complete -F _service /etc/init.d/apache-htcacheclean
+complete -A helptopic help
+complete -A stopped -P '"%' -S '"' bg
+complete -o filenames -d -X '.[^./]*' -F _loexp_ libreoffice
+complete -F _filedir_xspec xine
+complete -F _filedir_xspec xpdf
+complete -F _longopt pr
+complete -F _service /etc/init.d/screen-cleanup
+complete -F _pacat paplay
+complete -F _longopt m4
+complete -F _service /etc/init.d/grub-common
+complete -F _filedir_xspec aviplay
+complete -F _filedir_xspec latex
+complete -F _longopt uname
+complete -F _longopt tac
+complete -o filenames -d -X '.[^./]*' -F _loexp_ lodraw
+complete -F _longopt bc
+complete -F _desktop_file_validate desktop-file-validate
+complete -F _filedir_xspec rvim
+complete -F _known_hosts tracepath
+complete -F _filedir_xspec ogg123
+complete -F _service /etc/init.d/apache2
+complete -F _filedir_xspec ps2pdfwr
+complete -F _service /etc/init.d/postfix
+complete -o filenames -d -X '.[^./]*' -F _loexp_ lomath
+complete -F _completion_loader -D
+complete -F _filedir_xspec harbour
+complete -F _filedir_xspec xemacs
+complete -F _filedir_xspec unlzma
+complete -F _longopt paste
+complete -F _longopt mkdir
+complete -F _longopt cp
+complete -F _root_command really
+complete -F _root_command kdesudo
+complete -o filenames -d -X '.[^./]*' -F _loexp_ lowriter
+complete -F _longopt a2ps
+complete -F _apport-collect apport-collect
+complete -F _filedir_xspec vi
+complete -F _known_hosts mtr
+complete -F _service /etc/init.d/pppd-dns
+complete -v unset
+complete -F _filedir_xspec gvim
+complete -F _longopt dir
+complete -F _filedir_xspec kid3-qt
+complete -F _filedir_xspec xanim
+complete -F _service /etc/init.d/rpcbind
+complete -F _service /etc/init.d/plymouth
+complete -F _pactl pactl
+complete -F _filedir_xspec portecle
+complete -F _longopt cut
+complete -F _service /etc/init.d/mountall.sh
+complete -F _filedir_xspec oocalc
+complete -F _filedir_xspec emacs
+complete -F _service /etc/init.d/x11-common
+complete -F _service /etc/init.d/checkfs.sh
+complete -F _filedir_xspec fbxine
+complete -F _longopt sha384sum
+complete -F _service /etc/init.d/reboot
+complete -F _pacmd pacmd
+complete -F _filedir_xspec kpdf
+complete -F _longopt less
+complete -F _service /etc/init.d/kerneloops
+complete -F _command command
+complete -F _filedir_xspec oomath
+complete -F _filedir_xspec compress
+complete -F _longopt texindex
+complete -F _longopt env
+complete -F _longopt csplit
+complete -F _service /etc/init.d/umountroot
+complete -F _filedir_xspec iceweasel
+complete -F _filedir_xspec zcat
+complete -F _filedir_xspec unzip
+complete -F _longopt wc
+complete -F _longopt sha256sum
+complete -F _longopt mknod
+complete -F _known_hosts rsh
+complete -F _service /etc/init.d/nginx
+complete -F _filedir_xspec modplug123
+complete -F _filedir_xspec dvipdfm
+complete -F _known_hosts dig
+complete -F _service /etc/init.d/acpid
+complete -F _filedir_xspec oobase
+complete -F _filedir_xspec zipinfo
+complete -F _filedir_xspec epiphany
+complete -v readonly
+complete -F _root_command fakeroot
+complete -o filenames -F _grub_editenv grub-editenv
+complete -F _known_hosts fping6
+complete -F _service /etc/init.d/rsync
+complete -F _longopt units
+complete -F _longopt md5sum
+complete -F _longopt base64
+complete -o nospace -F _cd cd
+complete -F _service /etc/init.d/anacron
+complete -F _filedir_xspec galeon
+complete -F _filedir_xspec bzme
+complete -F _filedir_xspec xfig
+complete -F _longopt mkfifo
+complete -F _service /etc/init.d/sysstat
+complete -F _filedir_xspec xdvi
+complete -F _longopt uniq
+complete -F _longopt grep
+complete -F _service /etc/init.d/vboxballoonctrl-service
+complete -d pushd
+complete -o filenames -F _grub_set_entry grub-set-default
+complete -F _known_hosts rlogin
+complete -F _service /etc/init.d/hostname.sh
+complete -F _filedir_xspec cdiff
+complete -F _filedir_xspec rgview
+complete -F _npm_completion npm
+complete -F _filedir_xspec oowriter
+complete -F _command exec
+complete -o nospace -F _user_at_host finger
+complete -u slay
+complete -F _longopt ldd
+complete -F _service /etc/init.d/brltty
+complete -F _filedir_xspec netscape
+complete -F _filedir_xspec acroread
+complete -F _pacat parecord
+complete -o filenames -F _grub_mkimage grub-mkimage
+complete -F _filedir_xspec makeinfo
+complete -F _longopt nl
+complete -F _service /etc/init.d/plymouth-log
+complete -F _service /etc/init.d/lightdm
+complete -F _longopt nm
+complete -F _command xargs
+complete -F _service /etc/init.d/ebtables
+complete -F _service /etc/init.d/apparmor
+complete -F _filedir_xspec kwrite
+complete -F _filedir_xspec gview
+complete -F _filedir_xspec qiv
+complete -F _filedir_xspec bzcat
+complete -F _longopt expand
+complete -F _upstart_restart restart
+complete -F _filedir_xspec pdftex
+complete -F _function declare
+complete -F _filedir_xspec rpm2cpio
+complete -F _longopt bash
+complete -F _service /etc/init.d/qemu-kvm
+complete -F _dkms dkms
+complete -F _filedir_xspec view
+complete -F _filedir_xspec unxz
+complete -F _longopt sha512sum
+complete -F _filedir_xspec ly2dvi
+complete -F _filedir_xspec mozilla
+complete -F _longopt objcopy
+complete -u sux
+complete -F _pasuspender pasuspender
+complete -F _filedir_xspec modplugplay
+complete -F _root_command gksu
+complete -F _filedir_xspec pyflakes
+complete -F _service /etc/init.d/irqbalance
+complete -F _filedir_xspec dillo
+complete -F _filedir_xspec aaxine
+complete -F _filedir_xspec dvipdfmx
+complete -F _filedir_xspec advi
+complete -F _longopt rmdir
+complete -F _service /etc/init.d/console-setup
+complete -F _filedir_xspec lzmore
+complete -F _service /etc/init.d/bluetooth
+complete -o filenames -F _grub_setup grub-bios-setup
+complete -F _service /etc/init.d/procps
+complete -F _service /etc/init.d/fuse
+complete -F _service /etc/init.d/atd
+complete -F _filedir_xspec poedit
+complete -F _filedir_xspec firefox
+complete -F _filedir_xspec gv
+complete -F _longopt shasum
+complete -F _service /etc/init.d/umountnfs.sh
+complete -F _service /etc/init.d/rcS
+complete -F _service /etc/init.d/network-manager
+complete -F _service /etc/init.d/cups-browsed
+complete -F _filedir_xspec madplay
+complete -F _longopt sort
+complete -F _longopt ptx
+complete -F _longopt colordiff
+complete -o filenames -d -X '.[^./]*' -F _loexp_ lofromtemplate
+complete -F _filedir_xspec gtranslator
+complete -F _filedir_xspec jadetex
+complete -F _longopt fold
+complete -F _service /etc/init.d/avahi-daemon
+complete -u write
+complete -o filenames -d -X '.[^./]*' -F _loexp_ loweb
+complete -o dirnames -o filenames -F _apport-bug apport-bug
+complete -F _filedir_xspec gpdf
+complete -F _filedir_xspec kghostview
+complete -F _command ltrace
+complete -F _service /etc/init.d/virtlockd
+complete -F _service /etc/init.d/speech-dispatcher
+complete -F _function function
+complete -F _filedir_xspec pbzcat
+complete -F _known_hosts telnet
+complete -A shopt shopt
+complete -o filenames -F _grub_script_check grub-script-check
+complete -F _longopt sum
+complete -F _longopt od
+complete -F _longopt irb
+complete -F _filedir_xspec lzcat
+complete -F _known_hosts showmount
+complete -o nospace -F _user_at_host talk
+complete -F _service /etc/init.d/virtlogd
+complete -F _service /etc/init.d/thermald
+complete -F _longopt readelf
+complete -F _longopt netstat
+complete -F _service /etc/init.d/ufw
+complete -F _filedir_xspec vim
+complete -F _filedir_xspec dvips
+complete -F _longopt date
+complete -F _longopt cat
+complete -j -P '"%' -S '"' disown
+complete -F _longopt objdump
+complete -F _longopt diff
+complete -F _service /etc/init.d/cups
+complete -F _filedir_xspec dvitype
+complete -F _service /etc/init.d/libvirt-guests
+complete -F _service /etc/init.d/libvirt-bin
+complete -a unalias
+complete -F _longopt sed
+complete -F _longopt ld
+complete -F _service /etc/init.d/vboxweb-service
+complete -F _cmake cmake
+complete -o dirnames -o filenames -F _apport-unpack apport-unpack
+complete -F _longopt mv
+complete -F _filedir_xspec realplay
+complete -F _longopt grub
+complete -F _longopt gperf
+complete -F _known_hosts ftp
+complete -F _filedir_xspec gqmpeg
+complete -F _filedir_xspec lzegrep
+complete -o nospace -F _user_at_host ytalk
+complete -F _service /etc/init.d/udev
+complete -F _service /etc/init.d/dbus
+complete -F _longopt shar
+complete -F _known_hosts tracepath6
+complete -F _filedir_xspec bunzip2
+complete -o filenames -F _grub_probe grub-probe
+complete -F _longopt sha224sum
+complete -F _longopt awk
+complete -o filenames -F _grub_mkfont grub-mkfont
+complete -F _filedir_xspec znew
+complete -F _longopt who
+complete -F _filedir_xspec lokalize
+complete -F _filedir_xspec kate
+complete -F _filedir_xspec dragon
+complete -F _filedir_xspec pdflatex
+complete -F _longopt ln
+complete -F _ctest ctest
+complete -o filenames -F _grub_install grub-install
+complete -F _cpack cpack
+complete -F _filedir_xspec mozilla-firefox
+complete -F _filedir_xspec ooimpress
+complete -F _filedir_xspec uncompress
+complete -F _longopt tr
+complete -F _service /etc/init.d/mountnfs-bootclean.sh
+complete -F _filedir_xspec unpigz
+complete -F _service /etc/init.d/resolvconf
+complete -A setopt set
+complete -F _service /etc/init.d/ssh
+complete -u chfn
+complete -F _padsp padsp
+complete -F _service /etc/init.d/saned
+complete -o dirnames -o filenames -F _apport-cli apport-cli
+complete -F _filedir_xspec lynx
+complete -F _filedir_xspec ps2pdf
+complete -F _command vsound
+complete -F _service /etc/init.d/mountdevsubfs.sh
+complete -F _known_hosts ssh-installkeys
+complete -F _longopt seq
+complete -b builtin
+complete -j -P '"%' -S '"' fg
+complete -F _filedir_xspec mpg321
+complete -F _filedir_xspec mpg123
+complete -F _filedir_xspec pbunzip2
+complete -u runuser
+complete -F _filedir_xspec kid3
+complete -F _filedir_xspec pdfjadetex
+complete -F _filedir_xspec dvipdf
+complete -F _longopt ls
+complete -F _service /etc/init.d/ondemand
+complete -u w
+complete -F _filedir_xspec gharbour
+complete -F _service /etc/init.d/ubuntu-fan
+complete -F _service /etc/init.d/killprocs
+complete -c type
+complete -F _filedir_xspec texi2html
+complete -F _longopt unexpand
+complete -F _service /etc/init.d/checkroot-bootclean.sh
+complete -F _update_initramfs update-initramfs
+complete -F _filedir_xspec gunzip
+complete -F _service /etc/init.d/rc.local
+complete -o filenames -d -X '.[^./]*' -F _loexp_ loffice
+complete -F _filedir_xspec google-chrome
+complete -F _filedir_xspec okular
+complete -F _service /etc/init.d/umountfs
+complete -F _filedir_xspec slitex
+complete -F _filedir_xspec xzcat
+complete -F _filedir_xspec timidity
+complete -F _filedir_xspec dviselect
+complete -F _command tsocks
+complete -F _service /etc/init.d/apport
