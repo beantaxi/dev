@@ -1,6 +1,8 @@
 **/*.swp
 **/__pycache__
 /aws
+/go/bin
+/go/pkg
 /py/bravo.plugin
 /py/venv
 /py/venvs
