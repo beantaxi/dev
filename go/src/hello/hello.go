@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 //	"net/http"
-	"strconv"
+//	"strconv"
 	"github.com/valyala/fastjson"
 	"github.com/go-resty/resty"
 )
@@ -46,6 +46,8 @@ func mapThings () {
 	fmt.Println(len(d))
 }
 
+
+
 func fileThings () {
 	data, err := ioutil.ReadFile("/tmp/orgs.json")
 	if err != nil {
@@ -64,40 +66,82 @@ func fileThings () {
 	}
 
 	fmt.Println(len(a))
-	for _, org := range a {
-		id := org.GetStringBytes("Id")
-		name := org.GetStringBytes("Name")
-		slug := org.GetStringBytes("Slug")
-		inProduction := org.GetBool("InProduction")
-		PostOrg(id, name, slug, inProduction)
+	for _, o := range a {
+		fmt.Printf("o's type=%T\n", o)
+		obj := o.GetObject()
+		fmt.Printf("len=%d\n", obj.Len())
+		fmt.Printf("len=%s type=%T\n", obj.Get("Id"), obj.Get("Id"))
+		org := Organization {
+		Id : string(o.Get("Id").GetStringBytes()[:]),
+		Name : string(o.Get("Name").GetStringBytes()[:]),
+		Slug : string(o.Get("Slug").GetStringBytes()[:]),
+		InProduction : o.GetBool("InProduction"),
+		}
+		fmt.Println(org)
+//		user := User{Username: "testuser", Password: "testpass"}
+		PostOrg(org)
+//		PostOrg(user)
 	}
 }
 
+type AuthSuccess struct {
+	ID, Message string
+}
+type Organization struct {
+	Id           string `json:"id"`
+	Name         string `json:"name"`
+	Slug         string `json:slug`
+	InProduction bool   `json:inProduction`
+}
 
-func PostOrg (id []byte, name []byte, slug []byte, inProduction bool) {
-	fmt.Printf("%s %s (%s) %t\n", id, name, slug, inProduction)
-	body := make(map [string] string)
-	body["id"] = string(id[:])
-	body["name"] = string(name[:])
-	body["slug"] = string(name[:])
-	body["inProduction"] = strconv.FormatBool(inProduction)
+type User struct {
+	Id, Name, Slug string
+}
+
+func PostOrg (org Organization) {
+//func PostOrg (user User) {
+//	fmt.Printf("%s %s (%s) %t\n", org.id, org.name, org.slug, org.inProduction)
+//	body := make(map [string] string)
+//	body["id"] = org.id
+//	body["name"] = org.name
+//	body["slug"] = org.slug
+//	body["inProduction"] = strconv.FormatBool(org.inProduction)
 	var resp *resty.Response
+//	fmt.Println(org)
+//	user := User{Id: "test", Name: "test", Slug: "test"}
 	resp, err := resty.R().
 				 SetHeader("Content-Type", "application/json").
-				 SetBody(body).
-				 SetResult("Ok!").
+				 SetBody(org).
+//				 SetBody(user).
+//				 SetBody(body).
+				 SetResult(&AuthSuccess{}).
 				 Post("http://localhost:5000/organizations")
 	if err != nil {
 		fmt.Println(err)
 	}
 	fmt.Printf("%3d %s\n", resp.StatusCode(), resp.Status())
-	fmt.Println(string(resp.Body()[:]))
+//	fmt.Println(string(resp.Body()[:]))
 //	var header http.Header = resp.Header()
 //	for k, v := range header {
 //		fmt.Printf("%-32s %-32s\n", k, v)
 //	}
 }
 
+func objThings () {
+	org := Organization {
+		Id : "id",
+		Name : "name",
+		Slug : "slug",
+		InProduction : false,
+	}
+	printOrg(&org)
+}
+
+func printOrg (org* Organization) {
+	fmt.Println(*org)
+}
+
 func main () {
 	fileThings()
+//	objThings()
 }
