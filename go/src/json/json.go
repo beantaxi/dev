@@ -56,9 +56,9 @@ type Organization struct {
 	Name string
 	Slug string
 	InProduction bool
-	InsertedAt CustomTime
+	InsertedAt time.Time
 	InsertedBy string
-	UpdatedAt CustomTime
+	UpdatedAt time.Time
 	UpdatedBy string
 }
 
@@ -78,6 +78,12 @@ type User struct {
 	InsertedBy string
 	UpdatedAt string
 	UpdatedBy string
+}
+
+type Employee struct {
+	Id string
+	OrgName string
+	UserEmail string
 }
 
 
@@ -114,7 +120,13 @@ func doOrganizations () {
 	}
 }
 
+func testDateFormat () {
+
+}
+
+
 func main () {
 	doOrganizations()
 	doUsers()
+//	testDateFormat()
 }
