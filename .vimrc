@@ -28,7 +28,6 @@ map <C-Right> <Esc>:tabnext<CR>
 map <C-n> <Esc>:tabnew<CR>
 map <CR> O<Esc>j
 map <S-CR> d/\s*<CR>i<CR><Esc>
-map  d/\s*<CR>i<CR><Esc>
 
 set sessionoptions+=resize,winpos
 syntax on
