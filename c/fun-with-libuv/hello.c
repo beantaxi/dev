@@ -3,7 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <uv.h>
-
+#include "hashtable.h"
 
 // Global variables
 char PATH[PATH_MAX];
@@ -21,6 +21,25 @@ void printrc (int rc, const char* funcName)
 	{
 		printf("%d %s: %s\n", rc, uv_err_name(rc), uv_strerror(rc));
 	}
+}
+
+
+int watchPath (uv_loop_t* loop, const char* path, uv_fs_event_cb cb)
+{
+	// Initialize an event and start a watch on it	
+	uv_fs_event_t fsEvent;
+	rc = uv_fs_event_init(loop, &fsEvent);
+	printrc(rc, "uv_fs_event_init");
+	if (rc < 0)
+	{
+		return rc;
+	}
+
+	// Start the watch. The event loop will not terminate as long as this watch is an active ref
+	rc = uv_fs_event_start(&fsEvent, cb, path, UV_FS_EVENT_RECURSIVE);
+	printrc(rc, "uv_fs_event_start");
+
+	return rc;
 }
 
 
@@ -113,6 +132,13 @@ void vanilla_access ()
 }
 
 
+void testHashtable ()
+{
+	GHashTable* hashTable = createHashtable();
+	populateHashtable(hashTable);
+	printHashTable(hashTable);
+}
+
 void onChange (uv_fs_event_t* fsEvent, const char* filename, int events, int status)
 {
 	printf("onChange(): filename=%s events=%d status=%d\n", filename, events, status);
@@ -128,25 +154,28 @@ void onChange (uv_fs_event_t* fsEvent, const char* filename, int events, int sta
 	}
 }
 
-
 void watchForChanges ()
 {
 	printf("Watching for changes to %s ...\n", PATH);
 
+	// Create event loop
 	uv_loop_t* loop = malloc(sizeof(uv_loop_t));
 	rc = uv_loop_init(loop);
 	printrc(rc, "uv_loop_init");
 	
+	// Initialize an event and start a watch on it	
 	uv_fs_event_t fsEvent;
+	fsEvent.cb = onChange;
 	rc = uv_fs_event_init(loop, &fsEvent);
 	printrc(rc, "uv_fs_event_init");
-
-	rc = uv_fs_event_start(&fsEvent, onChange, PATH, 0);
+	rc = uv_fs_event_start(&fsEvent, fsEvent.cb, PATH, 0);
 	printrc(rc, "uv_fs_event_start");
 	
+	// Run the event loop
 	rc = uv_run(loop, UV_RUN_DEFAULT);
 	printrc(rc, "uv_run");   
 	
+	// Stop & close the event loop
 	uv_stop(loop);
 	rc = uv_loop_close(loop);
 	printrc(rc, "uv_loop_close");
@@ -166,5 +195,6 @@ int main (int argc, char* argv[])
 //	vanilla_access();
 //	checkForFile();
 //	testHelloEventLoop();
-	watchForChanges();
+	watchForChanges();   
+//	testHashtable();
 }
