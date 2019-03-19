@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <uv.h>
+#include "console.h"
 #include "hashtable.h"
 
 // Global variables
@@ -10,18 +11,6 @@ char PATH[PATH_MAX];
 int64_t counter = 0;
 int rc;
 uv_fs_t req_access;
-
-
-void printrc (int rc, const char* funcName)
-{
-	char buf[1024];
-	sprintf(buf, "%s()", funcName);
-	printf("%-32s rc=%d\n", buf, rc);
-	if (rc < 0)
-	{
-		printf("%d %s: %s\n", rc, uv_err_name(rc), uv_strerror(rc));
-	}
-}
 
 
 int watchPath (uv_loop_t* loop, const char* path, uv_fs_event_cb cb)
@@ -195,6 +184,8 @@ int main (int argc, char* argv[])
 //	vanilla_access();
 //	checkForFile();
 //	testHelloEventLoop();
-	watchForChanges();   
+//	watchForChanges();   
 //	testHashtable();
+
+	simpleConsole();
 }

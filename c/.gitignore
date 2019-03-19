@@ -2,8 +2,10 @@
 !/**/
 !*.*
 *.o
+*.a
 *.swo
 *.swp
 a.out
 movieWatcher.ini
 coreutils-src/**
+**/.vscode/

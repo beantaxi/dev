@@ -2,6 +2,7 @@
 #include <glib.h>
 #include "hashtable.h"
 
+
 GHashTable* createHashtable ()
 {
     GHashFunc hashFunc = g_str_hash;
