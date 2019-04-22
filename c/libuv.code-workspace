@@ -1,0 +1,23 @@
+{
+	"folders": [
+		{
+			"path": "/Users/chris/dev/git/libuv"
+		},
+		{
+			"path": "fun-with-libuv"
+		},
+		{
+			"path": "/Users/chris/dev/git/libuv-std-io-tcp-io"
+		},
+		{
+			"path": "/usr/local/include"
+		},
+		{
+			"path": "/usr/local/Cellar/libuv/1.26.0/include/uv"
+		},
+		{
+			"path": "/private/tmp/clone"
+		}
+	],
+	"settings": {}
+}

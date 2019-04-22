@@ -48,21 +48,32 @@ void on_alloc (uv_handle_t* handle, size_t size, uv_buf_t* buf)
 
 void on_close (uv_handle_t* handle)
 {
-    printf("Inside on_close() ...\n");
-    printf("A handle was closed: %p (type=%d fd=%d).\n", (void*)handle, handle->type, handle->u.fd);
+    fprintf(stderr, "Inside on_close(): %p ...\n", handle);
+
+    if (handle->data != NULL)
+    {
+        fprintf(stderr, "Freeing handle->data: %p ...\n", handle->data);
+        free(handle->data);
+    }
+    fprintf(stderr, "Freeing handle: %p ...\n", handle);
+    free(handle);
+
     if (loop.active_handles == 0)
     {
         // If there are no more active handles after this, stop the loop
         uv_stop(&loop);
     }
+    
+    printf("A handle was closed: %p (type=%d fd=%d).\n", (void*)handle, handle->type, handle->u.fd);
 }
 
 
 void on_walk_close_handle (uv_handle_t* handle, void* arg)
 {
-    printf("A handle was walked: %p (type=%d)\n", handle, handle->type);
+    fprintf(stderr, "Inside on_walk_close_handle(): %p ...\n", handle);
 //    printf("Inside on_walk: NOP for now. arg=%s\n", (const char*)arg);
     uv_close(handle, on_close);
+    printf("A handle was walked: %p (type=%d)\n", handle, handle->type);
 }
 
 

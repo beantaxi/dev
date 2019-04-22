@@ -1,0 +1,18 @@
+{
+	"folders": [
+		{
+			"path": "fun-with-libuv"
+		},
+		{
+			"path": "/Users/chris/dev/git/libuv-std-io-tcp-io"
+		},
+		{
+			"path": "/Users/chris/dev/git/libuv"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"stdlib.h": "c"
+		}
+	}
+}
