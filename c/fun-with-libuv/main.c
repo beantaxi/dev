@@ -1,15 +1,9 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <uv.h>
+#include "bigBuffer.h"
 #include "common.h"
 #include "string.h"
-
-typedef struct BigBuffer_s
-{
-    char* data;
-    long iCur;
-} BigBuffer;
-
 
 typedef struct Context_s
 {
@@ -17,7 +11,6 @@ typedef struct Context_s
     uv_tcp_t* tcpHandle;
     BigBuffer* bb;
 } Context;
-
 
 void connectToHost (Context* ctx);
 Context* cloneContext (Context* ctx);
@@ -42,18 +35,15 @@ const char* request[] =
 "\r\n"
 };
 
-
-BigBuffer* createBigBuffer (long size)
+Context* cloneContext (Context* ctx)
 {
-    BigBuffer* bb = malloc(sizeof(BigBuffer));
-    fprintf(stderr, "Created bb: %p\n", bb);
-    bb->data = malloc(size);
-    fprintf(stderr, "Created bb->data: %p\n", bb->data);
-    memset(bb->data, 0, size);
-    bb->iCur = 0;
+    Context* ctx2 = malloc(sizeof(*ctx2));
+    fprintf(stderr, "Created ctx2: %p\n", ctx2);
+    memcpy(ctx2, ctx, sizeof(*ctx2));
 
-    return bb;
+    return ctx2;
 }
+
 
 /*
     Context
@@ -81,15 +71,6 @@ void connectToHost (Context* ctx)
     req_connect->data = ctx;
     rc = uv_tcp_connect(req_connect, ctx->tcpHandle, ctx->addrInfo->ai_addr, onConnect);
     printrc(rc, "uv_tcp_connect");
-}
-
-Context* cloneContext (Context* ctx)
-{
-    Context* ctx2 = malloc(sizeof(*ctx2));
-    fprintf(stderr, "Created ctx2: %p\n", ctx2);
-    memcpy(ctx2, ctx, sizeof(*ctx2));
-
-    return ctx2;
 }
 
 
@@ -259,12 +240,18 @@ void onHostnameResolution (uv_getaddrinfo_t* req, int status, struct addrinfo* a
 
 void onHttpRecv (uv_stream_t* stream, ssize_t nRead, const uv_buf_t* buf)
 {
+    assert(stream->data != NULL);
+
     fprintf(stderr, "onHttpRecv: nRead=%ld buf->len=%ld\n", nRead, buf->len);
     if (nRead == UV_EOF)
     {
         fprintf(stderr, "EOF reached!");
     }
-    // Open file for writing
+    else
+    {
+        Context* ctx = (Context*)stream->data;
+        bigBuffer_append(ctx->bb, buf->base, nRead);
+    }
 }
 
 
@@ -291,6 +278,9 @@ void onTimer (uv_timer_t* handle)
     assert(handle->data != NULL);
     Context* ctx = (Context*)handle->data;
     assert(ctx->tcpHandle != NULL);
+
+    fprintf(stderr, "Timer is up. ctx->bb->size=%ld\n", ctx->bb->size);
+
     uv_close((uv_handle_t*)ctx->tcpHandle, on_close);   
 
     // I honestly don't know why this async stuff is here. Maybe I was just playing.
@@ -313,6 +303,7 @@ int main ()
 
     Context* ctx = malloc(sizeof(Context));
     fprintf(stderr, "Created ctx: %p\n", ctx);
+    ctx->bb = bigBuffer_create(0);
 
     // Set up the timer
     uv_timer_t* handle_timer = malloc(sizeof(uv_timer_t));
