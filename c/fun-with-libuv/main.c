@@ -2,21 +2,16 @@
 #include <stdlib.h>
 #include <uv.h>
 #include "bigBuffer.h"
+#include "context.h"
 #include "common.h"
 #include "string.h"
 
-typedef struct Context_s
-{
-    struct addrinfo* addrInfo;
-    uv_tcp_t* tcpHandle;
-    BigBuffer* bb;
-} Context;
-
 void connectToHost (Context* ctx);
-Context* cloneContext (Context* ctx);
 void dumpAddresses (struct addrinfo* addInfo);
 void freeHandle (uv_handle_t* handle);
+void saveFile (Context* ctx);
 void sendHttpRequest (Context* ctx, uv_connect_t* req);
+void writeBufferToFile (Context* ctx);
 
 void onAsync (uv_async_t* handle);
 void onHostnameResolution (uv_getaddrinfo_t* reqi, int status, struct addrinfo* addrInfo);
@@ -34,15 +29,6 @@ const char* request[] =
 "Accept: image/png\r\n",
 "\r\n"
 };
-
-Context* cloneContext (Context* ctx)
-{
-    Context* ctx2 = malloc(sizeof(*ctx2));
-    fprintf(stderr, "Created ctx2: %p\n", ctx2);
-    memcpy(ctx2, ctx, sizeof(*ctx2));
-
-    return ctx2;
-}
 
 
 /*
@@ -93,40 +79,6 @@ void dumpAddresses (struct addrinfo* addrInfo)
 }
 
 
-void freeBigBuffer (BigBuffer* bb)
-{
-    if (bb->data != NULL)
-    {
-        free(bb->data);
-    }
-
-    free(bb);
-}
-
-
-void freeContext (Context* ctx)
-{
-    if (ctx->addrInfo != NULL)
-    {
-        uv_freeaddrinfo(ctx->addrInfo);
-    }
-
-    if (ctx->tcpHandle != NULL)
-    {
-        if (ctx->tcpHandle->data != NULL)
-        {
-            free(ctx->tcpHandle->data);
-        }
-        free(ctx->tcpHandle);
-    }
-
-    if (ctx->bb != NULL)
-    {
-        freeBigBuffer(ctx->bb);
-    }
-}
-
-
 /*
     Request
         Sets:   req_write->data = ctx
@@ -150,6 +102,14 @@ void sendHttpRequest (Context* ctx, uv_connect_t* req)
 }
 
 
+void writeBufferToFile (Context* ctx)
+{
+    fprintf(stderr, "About to save file!\n");
+    const char* filename = "/tmp/texas.png";
+    ctx->path = strdup(filename);
+
+    
+} 
 /******************************************************************************
  * 
  * Callbacks
@@ -245,7 +205,8 @@ void onHttpRecv (uv_stream_t* stream, ssize_t nRead, const uv_buf_t* buf)
     fprintf(stderr, "onHttpRecv: nRead=%ld buf->len=%ld\n", nRead, buf->len);
     if (nRead == UV_EOF)
     {
-        fprintf(stderr, "EOF reached!");
+        fprintf(stderr, "EOF reached! About to write the file");
+        writeBufferToFile((Context*)stream->data);
     }
     else
     {
@@ -263,7 +224,7 @@ void onHttpSend (uv_write_t* req, int status)
     assert(req->data != NULL);
     assert(req->handle != NULL);
     uv_stream_t* stream = req->handle;
-    stream->data = cloneContext((Context*)req->data);
+    stream->data = context_clone((Context*)req->data);
     rc = uv_read_start(stream, onAlloc, onHttpRecv);
     printrc(rc, "uv_read_start");
 
@@ -280,10 +241,13 @@ void onTimer (uv_timer_t* handle)
     assert(ctx->tcpHandle != NULL);
 
     fprintf(stderr, "Timer is up. ctx->bb->size=%ld\n", ctx->bb->size);
-
     uv_close((uv_handle_t*)ctx->tcpHandle, on_close);   
 
+    writeBufferToFile(ctx);
+
+
     // I honestly don't know why this async stuff is here. Maybe I was just playing.
+/*
     uv_async_t* handle_async = malloc(sizeof(uv_async_t));
     fprintf(stderr, "Created handle_async: %p\n", handle_async);
     memset(handle_async, 0, sizeof(*handle_async));
@@ -292,6 +256,7 @@ void onTimer (uv_timer_t* handle)
     uv_unref((uv_handle_t*)handle_async);
     rc = uv_async_send(handle_async);
     printrc(rc, "uv_async_send");
+*/
 }
 
 

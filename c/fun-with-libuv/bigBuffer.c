@@ -41,6 +41,21 @@ BigBuffer* bigBuffer_create (long size)
 }
 
 
+void bigBuffer_free (BigBuffer* bb)
+{
+    if (bb->data != NULL)
+    {
+        fprintf(stderr, "%p: freeing bb->data\n", bb->data);
+        free(bb->data);
+    }
+
+    fprintf(stderr, "%p: freeing bb\n", bb);
+    free(bb);
+}
+
+
+
+
 BigBuffer* bigBuffer_resize (BigBuffer* bb, long new_size)
 {
     fprintf(stderr, "Resizing BigBuffer [%p] from %ld to %ld\n", bb, bb->size, new_size);
