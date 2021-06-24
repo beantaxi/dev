@@ -1,0 +1,152 @@
+{
+	// Place your snippets for shellscript here. Each snippet is defined under a snippet name and has a prefix, body and 
+	// description. The prefix is what is used to trigger the snippet and the body will be expanded and inserted. Possible variables are:
+	// $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders. Placeholders with the 
+	// same ids are connected.
+	// Example:
+	"Validate command line arguments": {
+		"prefix": "chkargs",
+		"description": "Validate command line arguments",
+		"body": [
+			"# shellcheck disable=SC2016",
+			"(( $# == $1 )) || { printf 'Usage: $2\\n' >&2; return 1; }"
+		]
+	},
+
+	"Validate a variable number of command line arguments": {
+		"prefix": "chkargs2",
+		"description": "Validate command line arguments",
+		"body": [
+			"# shellcheck disable=SC2016",
+			"{ (( $# >= $1 )) && (( $# <= $2 )); } || { printf 'Usage: $3 [$4]\\n' >&2; return 1; }"
+		]
+	},
+
+	"Check that a command exists": {
+		"prefix": "chkcmd",
+		"body": "command -v \"$cmd\" || { printf '%s is required, but was not found.\\n' \"$cmd\"; return 255; }"
+	},
+
+	"Check that a device exists": {
+		"prefix": "chkdev",
+		"body": "[[ -b \"/dev/$1\" ]] || { echo \"Non-existent device: /dev/$1\" >&2; return 1; }",
+		"description": "Check that a device exists"
+	},
+
+	"Check that a dir exists": {
+		"prefix": "chkdir",
+		"body": "[[ -d \"$$1\" ]] || { printf 'Non-existent folder: %s\\n' \"$$1\" >&2; return 1; }",
+		"description": "Check that a folder exists"
+	},
+
+	"Validate the existence of an environment variable": {
+		"prefix": "chkenv",
+		"body": [
+			"[[ -n \"$$1\" ]] || { echo 'Please set $$1' >&2; return 1; }",
+		],
+		"description": "Log output to console"
+	},
+
+	"Validate the existence of a function": {
+		"prefix": "chkfn",
+		"body": [
+			"declare -F $1 >/dev/null || source hooks/funcs.sh",
+		],
+		"description": "Log output to console"
+	},
+
+	"Check that a file exists": {
+		"prefix": "chkfile",
+		"body": "[[ -f \"$$1\" ]] || { echo \"Non-existent path: $$1\" >&2; return 1; }",
+		"description": "Check that a file exists"
+	},
+
+	"Check that a folder exists": {
+		"prefix": "chkfolder",
+		"body": "[[ -d \"$$1\" ]] || { echo \"Non-existent folder: $$1\" >&2; return 1; }",
+		"description": "Check that a folder exists"
+	},
+
+	"Check that a systemd service exists": {
+		"prefix": "chksvc",
+		"body": "systemctl cat \"$1\" >/dev/null 2>&1 || { printf 'Non-existent service: %s\\n'; \"$1\"; }"
+	},
+
+	"Validate variable": {
+		"prefix": "chkvar",
+		"body": [
+			"[[ -n \"$$1\" ]] || { echo '$$1 is not set' >&2; return 1; }",
+		],
+		"description": "Validate variable"
+	},
+
+	"Check for Vault login": {
+		"prefix": "chkvlt",
+		"body": "check-for-vault-login || login-to-vault || return $?",
+		"description": "Check for Vault login"
+	},
+
+	"Regular command": {
+		"prefix": "cmd",
+		"body": "$1 >/dev/null || return"
+	},
+
+	"Read value from cubbyhole": {
+		"prefix": "cub",
+		"body": "local $1=$(read-from-cubbyhole $1)",
+		"description": "Read value from cubbyhole"
+	},
+
+	"Check for GITHUB_TOKEN": { "prefix": "chkgit", "body": "\t[[ -n \"\\$GITHUB_TOKEN\" ]] || { echo 'Please set \\$GITHUB_TOKEN' >&2; return 1; }\n\t"},
+
+	"Get S3 bucket for current account": {
+		"prefix": "get-bucket",
+		"body": "local bucket; bucket=$(get-bucket) || return",
+		"description": "Get S3 bucket for current account"
+	},
+
+	"Get S3 bucket for current account using AWS CLI": {
+		"prefix": "get-bucket-raw",
+		"body": "bucket=$(aws sts get-caller-identity --query 'Account' --output text)",
+		"description": "Get S3 bucket for current account"
+	},
+
+	"Set variable from command, and return 1 on failure (this has to be done in two commands because 'local' is weird.)": {
+		"prefix": "setvar",
+		"body": "local $1; $1=$($2) || return",
+		"description": "Set variable from command, and return 1 on failure"
+	},
+
+	"Insert shebang": {
+		"prefix": "shebang",
+		"description": "Insert shebang",
+		"body": [
+			"#! /usr/bin/env bash",
+			"set -ux",
+			"",
+			"",
+			"main ()",
+			"{",
+			"\tsource './funcs.sh'",
+			"",	
+			"}",
+			"",
+			"return 2>/dev/null || main \"$@\"",
+		]
+	},
+
+	"Print variable": {
+		"prefix": "pf",
+		"body": "printf '%s' \"$$1\""
+	},
+
+	"User exists": {
+		"prefix": "user exists",
+		"body": "id --user \"$1\" >/dev/null && $2"
+	}
+
+	// "Set variable to the output of a command": {
+	// 	"prefix": "setvar",
+	// 	"body": "local $1; $1="
+	// }
+}
